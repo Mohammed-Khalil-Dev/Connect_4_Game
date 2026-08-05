@@ -12,7 +12,7 @@ import com.example.connect4game.model.BoardConfig
 import com.example.connect4game.model.Piece
 
 @Composable
-fun BoardGrid(pieces: List<List<Piece>>) {
+fun BoardGrid(pieces: List<List<Piece>>, onColumnClick: (Int) -> Unit) {
 
     Row(Modifier.fillMaxWidth().background(Color.Blue)) {
 
@@ -42,5 +42,5 @@ fun PreviewBoardGrid() {
             }
         }
     }
-    BoardGrid(mockBoardData)
+    BoardGrid(mockBoardData) {}
 }

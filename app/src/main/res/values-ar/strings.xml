@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">" كونكت  4"</string>
+    <string name="single_player_vs_bot">لاعب واحد (ضد الجهاز)</string>
+    <string name="two_player_local">لاعبان (على نفس الجهاز)</string>
+</resources>

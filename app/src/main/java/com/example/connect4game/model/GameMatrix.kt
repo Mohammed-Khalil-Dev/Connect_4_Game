@@ -1,11 +1,8 @@
 package com.example.connect4game.model
 
 class GameMatrix {
-
-    private val grid: List<List<Piece>> = List(BoardConfig.NUMBER_OF_COLUMNS) {
-        List(size = BoardConfig.NUMBER_OF_ROWS) { rowIndex ->
-            Piece.EMPTY
-        }
+    private val grid: MutableList<MutableList<Piece>> = MutableList(BoardConfig.NUMBER_OF_COLUMNS) {
+        MutableList(BoardConfig.NUMBER_OF_ROWS) { Piece.EMPTY }
     }
 
 
@@ -13,8 +10,18 @@ class GameMatrix {
         return grid[col][row]
     }
 
-    // Easy function to handle a player's move
+
     fun dropPiece(col: Int, piece: Piece) {
-        // logic to find the lowest empty slot in this specific column
+        for (i in grid[col].lastIndex downTo 0) {
+            if (grid[col][i] == Piece.EMPTY) {
+                grid[col][i] = piece
+                break
+            }
+
+        }
+    }
+
+    fun getBoard(): List<List<Piece>> {
+        return grid
     }
 }

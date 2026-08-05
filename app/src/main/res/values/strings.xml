@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">Connect 4 Game</string>
+    <string name="app_name">Connect 4</string>
+    <string name="single_player_vs_bot">Single Player (vs. bot)</string>
+    <string name="two_player_local">Two Player (Local)</string>
 </resources>

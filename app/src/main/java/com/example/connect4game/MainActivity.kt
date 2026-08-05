@@ -5,12 +5,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import com.example.connect4game.model.GameType
+import com.example.connect4game.ui.screens.GameScreen
+import com.example.connect4game.ui.screens.MainScreen
 import com.example.connect4game.ui.theme.Connect4GameTheme
 
 class MainActivity : ComponentActivity() {
@@ -18,30 +21,27 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            Connect4GameTheme {
+            Connect4GameTheme(darkTheme = true) {
+
+                // mutableStateOf reruns setContent on value change.
+                // remember Compose not to reset this variable back to null.
+                var currentGameType by remember { mutableStateOf<GameType?>(null) }
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+
+                    if (currentGameType == null) {
+                        MainScreen(
+                            paddingValues = innerPadding,
+                            onGameTypeSelected = { selectedType ->
+                                currentGameType = selectedType
+                            }
+                        )
+                    }
+                    else {
+                        GameScreen(gameType = currentGameType!!, paddingValues = innerPadding)
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Connect4GameTheme {
-        Greeting("Android")
     }
 }

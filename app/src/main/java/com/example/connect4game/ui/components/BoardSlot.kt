@@ -1,6 +1,7 @@
 package com.example.connect4game.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.example.connect4game.model.Piece
 
 @Composable
@@ -31,7 +33,15 @@ fun BoardSlot(piece: Piece) {
             .background(
                 color = circleColor,
                 shape = CircleShape
-            ))
+            )) {
+            if (piece != Piece.EMPTY) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(0.75f)
+                        .border(width = 2.dp, color = Color.Black.copy(alpha = 0.2f), shape = CircleShape)
+                )
+            }
+        }
 
     }
 }
