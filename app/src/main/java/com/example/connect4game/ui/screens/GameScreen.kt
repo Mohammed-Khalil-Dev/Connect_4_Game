@@ -11,6 +11,7 @@ import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -65,8 +66,8 @@ fun TwoPlayerGameScreen() {
     }
     var uiState by remember { mutableStateOf(GameUiState()) }
     val gameMatrix = remember { GameMatrix() }
-    var redWins by remember { mutableStateOf(0) }
-    var orangeWins by remember { mutableStateOf(0) }
+    var redWins by remember { mutableIntStateOf(0) }
+    var orangeWins by remember { mutableIntStateOf(0) }
 
 
     Column {
@@ -96,14 +97,6 @@ fun TwoPlayerGameScreen() {
             }
         }
     }
-
-
-
-
-
-
-
-
 
     val canPlay = uiState.clickedColIndex != null && currentBoard[uiState.clickedColIndex!!][0] == Piece.EMPTY
             && uiState.gameStateDetails.gameState == GameState.IN_PROGRESS

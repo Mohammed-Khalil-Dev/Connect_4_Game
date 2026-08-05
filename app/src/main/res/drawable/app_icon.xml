@@ -1,0 +1,26 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="512dp"
+    android:height="512dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Blue Board Background -->
+    <path
+        android:fillColor="#0000FF"
+        android:pathData="M32,32h448a32,32 0 0,1 32,32v448a32,32 0 0,1 -32,32H32a32,32 0 0,1 -32,-32V64a32,32 0 0,1 32,-32z" />
+
+    <!-- Row 1 Slots / Pieces -->
+    <path android:fillColor="#FF0000" android:pathData="M112,112m-32,0a32,32 0 1,1 64,0a32,32 0 1,1 -64,0" />
+    <path android:fillColor="#FFA500" android:pathData="M256,112m-32,0a32,32 0 1,1 64,0a32,32 0 1,1 -64,0" />
+    <path android:fillColor="#00FFFF" android:pathData="M400,112m-32,0a32,32 0 1,1 64,0a32,32 0 1,1 -64,0" />
+
+    <!-- Row 2 Slots / Pieces -->
+    <path android:fillColor="#00FF00" android:pathData="M112,256m-32,0a32,32 0 1,1 64,0a32,32 0 1,1 -64,0" />
+    <path android:fillColor="#FF00FF" android:pathData="M256,256m-32,0a32,32 0 1,1 64,0a32,32 0 1,1 -64,0" />
+    <path android:fillColor="#FFFFFF" android:pathData="M400,256m-32,0a32,32 0 1,1 64,0a32,32 0 1,1 -64,0" />
+
+    <!-- Row 3 Slots / Pieces -->
+    <path android:fillColor="#0000FF" android:pathData="M112,400m-32,0a32,32 0 1,1 64,0a32,32 0 1,1 -64,0" />
+    <path android:fillColor="#FF0000" android:pathData="M256,400m-32,0a32,32 0 1,1 64,0a32,32 0 1,1 -64,0" />
+    <path android:fillColor="#FFA500" android:pathData="M400,400m-32,0a32,32 0 1,1 64,0a32,32 0 1,1 -64,0" />
+</vector>

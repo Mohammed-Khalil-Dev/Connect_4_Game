@@ -38,7 +38,7 @@ fun BoardSlot(piece: Piece, isWinning: Boolean = false) {
             drawContent()
 
 
-// ... inside your drawWithContent block
+
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
