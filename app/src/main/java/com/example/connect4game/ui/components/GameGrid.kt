@@ -15,8 +15,9 @@ import com.example.connect4game.model.Piece
 
 @Composable
 fun BoardGrid(pieces: List<List<Piece>>,
-    selectedColumn: Int?, // 1. Add this parameter
-    onColumnClick: (Int) -> Unit
+              selectedColumn: Int?,
+              winningCells: List<Pair<Int, Int>>,
+              onColumnClick: (Int) -> Unit
 ) {
     Row(Modifier.fillMaxWidth().background(Color.Blue)) {
 
@@ -42,8 +43,10 @@ fun BoardGrid(pieces: List<List<Piece>>,
                         drawRect(color = columnColor)
                     }
             ) {
-                columnList.forEach { piece ->
-                    BoardSlot(piece)
+                columnList.forEachIndexed { rowIndex, piece ->
+                    val isWinningCell = winningCells.contains(Pair(rowIndex, colIndex))
+
+                    BoardSlot(piece = piece, isWinning = isWinningCell)
                 }
             }
         }
@@ -58,10 +61,18 @@ fun PreviewBoardGrid() {
 
             when (columnIndex) {
                 0 if rowIndex == 5 -> Piece.RED
-                1 if rowIndex == 5 -> Piece.YELLOW
+                1 if rowIndex == 5 -> Piece.ORANGE
                 else -> Piece.EMPTY
             }
         }
     }
-    BoardGrid(mockBoardData, 2) {}
+
+    val mockWinningCells = listOf(Pair(5, 0))
+
+    BoardGrid(
+        pieces = mockBoardData,
+        selectedColumn = 2,
+        winningCells = mockWinningCells,
+        onColumnClick = {}
+    )
 }

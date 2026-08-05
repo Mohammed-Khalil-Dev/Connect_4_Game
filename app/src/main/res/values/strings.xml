@@ -4,6 +4,11 @@
     <string name="two_player_local">Two Player (Local)</string>
     <string name="play_turn">Play Turn</string>
     <string name="red_player_turn">Red Player Turn</string>
-    <string name="yellow_player_turn">Yellow Player Turn</string>
+    <string name="orange_player_turn">Orange Player Turn</string>
     <string name="reset_game">Reset Game</string>
+    <string name="orange_player_wins">Orange Player Wins!</string>
+    <string name="red_player_wins">Red Player Wins!</string>
+    <string name="it_is_a_draw">It is a Draw!</string>
+    <string name="red_player_wins_count">"Red Player wins: %1$d "</string>
+    <string name="orange_player_wins_count">Orange Player wins: %1$d</string>
 </resources>

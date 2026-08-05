@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -64,33 +65,39 @@ fun TwoPlayerGameScreen() {
     }
     var uiState by remember { mutableStateOf(GameUiState()) }
     val gameMatrix = remember { GameMatrix() }
+    var redWins by remember { mutableStateOf(0) }
+    var orangeWins by remember { mutableStateOf(0) }
 
 
     Column {
-        Text("Red Player wins: 0", color = Color.Red)
-        Text("Yellow Player wins: 0", color = colorResource(R.color.orange))
+        Text(stringResource(R.string.red_player_wins_count, redWins), color = Color.Red)
+        Text(stringResource(R.string.orange_player_wins_count, orangeWins), color = colorResource(R.color.orange))
     }
 
     val currentBoard = remember(uiState.boardVersion) {
         gameMatrix.getBoard().map { column -> column.toList() }
     }
 
-    BoardGrid(pieces = currentBoard, selectedColumn = uiState.clickedColIndex) { newSelectedCol ->
-        uiState = uiState.copy(clickedColIndex = newSelectedCol)
+    BoardGrid(pieces = currentBoard, selectedColumn = uiState.clickedColIndex, winningCells = uiState.gameStateDetails.winningCells) { newSelectedCol ->
+        if (uiState.gameStateDetails.gameState == GameState.IN_PROGRESS) {
+            uiState = uiState.copy(clickedColIndex = newSelectedCol)
+        }
     }
-    when (uiState.gameState) {
-        GameState.YELLOW_WON ->  Text("Yellow Player Wins!", color = colorResource(R.color.orange))
-        GameState.RED_WON -> Text("Red Player Wins!",  color = Color.Red)
-        GameState.DRAW ->  Text("It is a Draw!")
+    when (uiState.gameStateDetails.gameState) {
+        GameState.ORANGE_WON ->  Text(stringResource(R.string.orange_player_wins), color = colorResource(R.color.orange))
+        GameState.RED_WON -> Text(stringResource(R.string.red_player_wins),  color = Color.Red)
+        GameState.DRAW ->  Text(stringResource(R.string.it_is_a_draw))
         GameState.IN_PROGRESS -> {
             if (uiState.currentPlayer == Piece.RED) {
                 Text(stringResource(R.string.red_player_turn),  color = Color.Red)
             }
-            if (uiState.currentPlayer == Piece.YELLOW) {
-                Text(stringResource(R.string.yellow_player_turn),  color = colorResource(R.color.orange))
+            if (uiState.currentPlayer == Piece.ORANGE) {
+                Text(stringResource(R.string.orange_player_turn),  color = colorResource(R.color.orange))
             }
         }
     }
+
+
 
 
 
@@ -99,30 +106,44 @@ fun TwoPlayerGameScreen() {
 
 
     val canPlay = uiState.clickedColIndex != null && currentBoard[uiState.clickedColIndex!!][0] == Piece.EMPTY
-            && uiState.gameState == GameState.IN_PROGRESS
+            && uiState.gameStateDetails.gameState == GameState.IN_PROGRESS
 
-    Button(enabled = canPlay, onClick = {
+    Button(colors = buttonColors(
+        containerColor = if (uiState.currentPlayer == Piece.ORANGE) {
+            colorResource(R.color.orange)
+        } else {
+            Color.Red
+        }
+    ), enabled = canPlay, onClick = {
         val col = uiState.clickedColIndex ?: return@Button
         val landedRow = gameMatrix.dropPiece(col = col, piece = uiState.currentPlayer)
 
-        val newGameState = if (landedRow != null) {
-            checkGameState(gameMatrix, uiState.currentPlayer, landedRow, col)
-        }
-        else {
-            uiState.gameState
+
+        val newGameStateDetails = if (landedRow != null) {
+            val details = checkGameState(gameMatrix, uiState.currentPlayer, landedRow, col)
+
+            if (details.gameState == GameState.RED_WON) {
+                redWins++
+            }
+            else if (details.gameState == GameState.ORANGE_WON) {
+                orangeWins++
+            }
+            details
+        } else {
+            uiState.gameStateDetails
         }
 
         soundPool.play(dropSoundId, 1f, 1f, 0, 0, 1f)
 
-        val nextPlayer = if (newGameState == GameState.IN_PROGRESS) {
-            if (uiState.currentPlayer == Piece.RED) Piece.YELLOW else Piece.RED
+        val nextPlayer = if (newGameStateDetails.gameState == GameState.IN_PROGRESS) {
+            if (uiState.currentPlayer == Piece.RED) Piece.ORANGE else Piece.RED
         } else {
             uiState.currentPlayer
         }
 
 
         uiState = uiState.copy(
-            gameState = newGameState,
+            gameStateDetails = newGameStateDetails,
             currentPlayer = nextPlayer,
             boardVersion = uiState.boardVersion + 1,
             clickedColIndex = null

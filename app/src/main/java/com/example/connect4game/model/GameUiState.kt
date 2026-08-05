@@ -2,9 +2,10 @@ package com.example.connect4game.model
 
 
 data class GameUiState(
-    val currentPlayer: Piece = Piece.RED,
-    val gameState: GameState = GameState.IN_PROGRESS,
+    val currentPlayer: Piece = listOf(Piece.RED, Piece.ORANGE).random(),
+    val gameStateDetails: GameStateDetails = GameStateDetails(GameState.IN_PROGRESS, winningCells = emptyList()),
     val clickedColIndex: Int? = null,
     val boardVersion: Int = 0,
-    val winningCells: List<Pair<Int, Int>> = emptyList()
-)
+
+
+    )

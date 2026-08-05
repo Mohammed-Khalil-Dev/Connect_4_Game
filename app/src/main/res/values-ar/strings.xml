@@ -5,6 +5,11 @@
     <string name="two_player_local">لاعبان (على نفس الجهاز)</string>
     <string name="play_turn">العب الدور</string>
     <string name="red_player_turn">دور اللاعب الأحمر</string>
-    <string name="yellow_player_turn">دور اللاعب الأصفر</string>
+    <string name="orange_player_turn">دور اللاعب البرتقالي</string>
     <string name="reset_game">إعادة العبة</string>
+    <string name="orange_player_wins">اللاعب البرتقالي يفوز!</string>
+    <string name="red_player_wins">اللاعب الأحمر يفوز!</string>
+    <string name="it_is_a_draw">إنها تعادل!</string>
+    <string name="red_player_wins_count">فوزات اللاعب الأحمر: %1$d</string>
+    <string name="orange_player_wins_count">فوزات اللاعب البرتقالي: %1$d\n</string>
 </resources>

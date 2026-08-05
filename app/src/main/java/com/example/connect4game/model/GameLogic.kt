@@ -7,7 +7,7 @@ const val DIRECTION_DOWN = 1
 const val DIRECTION_LEFT = -1
 const val DIRECTION_RIGHT = 1
 const val DIRECTION_NONE = 0
-fun checkGameState(currentBoard: GameMatrix, currentPiece: Piece, currentRow: Int, currentCol: Int): GameCheckResult {
+fun checkGameState(currentBoard: GameMatrix, currentPiece: Piece, currentRow: Int, currentCol: Int): GameStateDetails {
     val upCells = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, DIRECTION_UP, DIRECTION_NONE)
     val downCells = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, DIRECTION_DOWN, DIRECTION_NONE)
     val verticalCells = upCells + downCells + Pair(currentRow, currentCol)
@@ -24,19 +24,19 @@ fun checkGameState(currentBoard: GameMatrix, currentPiece: Piece, currentRow: In
     val diagUpRight = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, DIRECTION_UP, DIRECTION_RIGHT)
     val diagonal2Cells = diagDownLeft + diagUpRight + Pair(currentRow, currentCol)
 
-    val winningState = if (currentPiece == Piece.RED) GameState.RED_WON else GameState.YELLOW_WON
+    val winningState = if (currentPiece == Piece.RED) GameState.RED_WON else GameState.ORANGE_WON
 
     if (verticalCells.size >= CONNECTED_PIECES_TO_WIN) {
-        return GameCheckResult(winningState, verticalCells)
+        return GameStateDetails(winningState, verticalCells)
     }
     if (horizontalCells.size >= CONNECTED_PIECES_TO_WIN) {
-        return GameCheckResult(winningState, horizontalCells)
+        return GameStateDetails(winningState, horizontalCells)
     }
     if (diagonal1Cells.size >= CONNECTED_PIECES_TO_WIN) {
-        return GameCheckResult(winningState, diagonal1Cells)
+        return GameStateDetails(winningState, diagonal1Cells)
     }
     if (diagonal2Cells.size >= CONNECTED_PIECES_TO_WIN) {
-        return GameCheckResult(winningState, diagonal2Cells)
+        return GameStateDetails(winningState, diagonal2Cells)
     }
 
     var isBoardFull = true
@@ -48,10 +48,10 @@ fun checkGameState(currentBoard: GameMatrix, currentPiece: Piece, currentRow: In
     }
 
     if (isBoardFull) {
-        return GameCheckResult(GameState.DRAW, emptyList())
+        return GameStateDetails(GameState.DRAW, emptyList())
     }
 
-    return GameCheckResult(GameState.IN_PROGRESS, emptyList())
+    return GameStateDetails(GameState.IN_PROGRESS, emptyList())
 }
 
 /**
