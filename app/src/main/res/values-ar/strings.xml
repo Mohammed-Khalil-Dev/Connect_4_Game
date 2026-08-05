@@ -3,4 +3,8 @@
     <string name="app_name">" كونكت  4"</string>
     <string name="single_player_vs_bot">لاعب واحد (ضد الجهاز)</string>
     <string name="two_player_local">لاعبان (على نفس الجهاز)</string>
+    <string name="play_turn">العب الدور</string>
+    <string name="red_player_turn">دور اللاعب الأحمر</string>
+    <string name="yellow_player_turn">دور اللاعب الأصفر</string>
+    <string name="reset_game">إعادة العبة</string>
 </resources>

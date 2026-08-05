@@ -3,6 +3,7 @@ package com.example.connect4game.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
@@ -23,7 +24,7 @@ fun MainScreen(
     onGameTypeSelected: (GameType) -> Unit
 ) {
     Column(
-        modifier = Modifier.padding(paddingValues),
+        modifier = Modifier.padding(paddingValues).fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

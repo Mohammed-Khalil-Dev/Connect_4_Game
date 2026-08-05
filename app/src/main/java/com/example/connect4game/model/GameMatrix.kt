@@ -11,14 +11,24 @@ class GameMatrix {
     }
 
 
-    fun dropPiece(col: Int, piece: Piece) {
+    fun clearBoard() {
+        for (col in grid.indices) {
+            for (row in grid[col].indices) {
+                grid[col][row] = Piece.EMPTY
+            }
+        }
+    }
+
+
+    fun dropPiece(col: Int, piece: Piece): Int?{
         for (i in grid[col].lastIndex downTo 0) {
             if (grid[col][i] == Piece.EMPTY) {
                 grid[col][i] = piece
-                break
+                return i
             }
 
         }
+        return null
     }
 
     fun getBoard(): List<List<Piece>> {

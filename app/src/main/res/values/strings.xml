@@ -2,4 +2,8 @@
     <string name="app_name">Connect 4</string>
     <string name="single_player_vs_bot">Single Player (vs. bot)</string>
     <string name="two_player_local">Two Player (Local)</string>
+    <string name="play_turn">Play Turn</string>
+    <string name="red_player_turn">Red Player Turn</string>
+    <string name="yellow_player_turn">Yellow Player Turn</string>
+    <string name="reset_game">Reset Game</string>
 </resources>

@@ -1,34 +1,55 @@
 package com.example.connect4game.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.connect4game.model.BoardConfig
 import com.example.connect4game.model.Piece
 
 @Composable
-fun BoardGrid(pieces: List<List<Piece>>, onColumnClick: (Int) -> Unit) {
-
+fun BoardGrid(pieces: List<List<Piece>>,
+    selectedColumn: Int?, // 1. Add this parameter
+    onColumnClick: (Int) -> Unit
+) {
     Row(Modifier.fillMaxWidth().background(Color.Blue)) {
 
-        pieces.forEach { columnList ->
-            // all columns set to weight 1 so they take 1 / 7 of row
-            Column(modifier = Modifier.weight(1f)) {
+        pieces.forEachIndexed { colIndex, columnList ->
+
+
+            val columnColor = if (colIndex == selectedColumn) {
+                Color.White.copy(alpha = 0.3f)
+            } else {
+                Color.Transparent
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+
+                    .clickable {
+                        onColumnClick(colIndex)
+                    }
+                    // Draw the slots first, then paint the highlight rectangle over them
+                    .drawWithContent {
+                        drawContent()
+                        drawRect(color = columnColor)
+                    }
+            ) {
                 columnList.forEach { piece ->
                     BoardSlot(piece)
                 }
             }
         }
-
     }
-
-
 }
+
 @Preview(showBackground = true)
 @Composable
 fun PreviewBoardGrid() {
@@ -42,5 +63,5 @@ fun PreviewBoardGrid() {
             }
         }
     }
-    BoardGrid(mockBoardData) {}
+    BoardGrid(mockBoardData, 2) {}
 }
