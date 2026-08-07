@@ -1,6 +1,7 @@
 package com.example.connect4game.ui.components
 
 import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -70,6 +71,12 @@ fun CustomTopBar(
                 }
             }
         )
+    }
+
+    if (currentScreen == Screen.MainMenu.name) {
+        BackHandler {
+            showExitDialog = true
+        }
     }
 
 

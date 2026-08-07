@@ -39,15 +39,9 @@ fun checkGameState(currentBoard: GameMatrix, currentPiece: Piece, currentRow: In
         return GameStateDetails(winningState, diagonal2Cells)
     }
 
-    var isBoardFull = true
-    for (col in 0 until BoardConfig.NUMBER_OF_COLUMNS) {
-        if (currentBoard.getPiece(0, col) == Piece.EMPTY) {
-            isBoardFull = false
-            break
-        }
-    }
 
-    if (isBoardFull) {
+
+    if (currentBoard.isBoardFull()) {
         return GameStateDetails(GameState.DRAW, emptyList())
     }
 

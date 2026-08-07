@@ -31,6 +31,10 @@ class GameMatrix {
         return null
     }
 
+    fun isBoardFull(): Boolean {
+        return grid.indices.none { colIndex -> getPiece(row = 0, colIndex) == Piece.EMPTY }
+    }
+
     fun getBoard(): List<List<Piece>> {
         return grid
     }
