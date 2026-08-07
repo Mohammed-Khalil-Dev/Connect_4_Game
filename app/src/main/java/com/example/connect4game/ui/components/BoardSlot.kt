@@ -48,6 +48,7 @@ fun BoardSlot(piece: Piece, isWinning: Boolean = false) {
                         Color.Cyan,
                         Color.Blue,
                         Color.Magenta,
+                        Color.Transparent,
                         Color.Transparent
                     ),
                     radius = size.width / 2f

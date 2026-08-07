@@ -34,6 +34,7 @@ import com.example.connect4game.model.checkGameState
 import com.example.connect4game.ui.components.BoardGrid
 import kotlin.properties.Delegates
 
+const val DROP_PIECE_SOUND_VOLUME: Float = 0.7f
 lateinit var soundPool: SoundPool
 var dropSoundId by Delegates.notNull<Int>()
 
@@ -97,20 +98,21 @@ fun TwoPlayerGameScreen() {
 
 
         val newGameStateDetails = if (landedRow != null) {
-            val details = checkGameState(gameMatrix, uiState.currentPlayer, landedRow, col)
+            val details: GameStateDetails = checkGameState(gameMatrix, uiState.currentPlayer,
+                landedRow, col)
 
-            if (details.gameState == GameState.RED_WON) {
-                redWins++
+            when(details.gameState) {
+                GameState.RED_WON -> redWins++
+                GameState.ORANGE_WON -> orangeWins++
+                else -> {}
             }
-            else if (details.gameState == GameState.ORANGE_WON) {
-                orangeWins++
-            }
-            details
-        } else {
+           details
+        }
+        else {
             uiState.gameStateDetails
         }
 
-        soundPool.play(dropSoundId, 1f, 1f, 0, 0, 1f)
+        soundPool.play(dropSoundId, DROP_PIECE_SOUND_VOLUME, DROP_PIECE_SOUND_VOLUME, 0, 0, 1f)
 
         val nextPlayer = if (newGameStateDetails.gameState == GameState.IN_PROGRESS) {
             if (uiState.currentPlayer == Piece.RED) Piece.ORANGE else Piece.RED
@@ -186,6 +188,8 @@ fun ResetGameButton(onReset: () -> Unit) {
         Text(stringResource(R.string.reset_game))
     }
 }
+
+
 
 
 @Composable

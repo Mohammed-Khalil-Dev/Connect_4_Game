@@ -1,6 +1,5 @@
 package com.example.connect4game.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +35,7 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun Connect4GameTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    // Dynamic color takes the user's wallpaper and generates a theme from it.
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit

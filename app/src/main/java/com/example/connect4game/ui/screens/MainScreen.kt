@@ -89,6 +89,6 @@ fun GameTypesArea(onGameTypeSelected: (GameType) -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewMainScreen() {
-    // Provide a dummy empty block { } for the preview so it doesn't crash
+
     MainScreen(onGameTypeSelected = { })
 }

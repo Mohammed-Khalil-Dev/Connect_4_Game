@@ -4,59 +4,77 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.connect4game.model.GameType
+import com.example.connect4game.ui.components.CustomTopBar
 import com.example.connect4game.ui.screens.GameScreen
 import com.example.connect4game.ui.screens.MainScreen
+import com.example.connect4game.ui.screens.Screen
 import com.example.connect4game.ui.theme.Connect4GameTheme
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val navController = rememberNavController()
+            // update the UI on Navigation stack change
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            // get the current route(screen)
+            val currentScreen = navBackStackEntry?.destination?.route
             Connect4GameTheme {
-                Surface(
+                Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    val navController = rememberNavController()
+                    topBar = {
+                        CustomTopBar(
+                            currentScreen = currentScreen,
+                            onBackClicked = { navController.popBackStack() },
+                            onSettingsClicked = {
+                              //TODO: Implement settings
+                            }
+                        )
+                    }
+                ) { innerPadding ->
+
 
 
                     NavHost(
                         navController = navController,
-                        startDestination = "main_screen"
+                        startDestination = Screen.MainMenu.name
                     ) {
 
 
-                        composable("main_screen") {
+                        composable(Screen.MainMenu.name) {
                             MainScreen(
                                 onGameTypeSelected = { selectedType ->
-
                                     if (selectedType == GameType.SINGLE_PLAYER) {
-                                        navController.navigate("single_player_screen")
-                                    } else {
-                                        navController.navigate("two_player_screen")
+                                        navController.navigate(Screen.SinglePlayer.name)
+                                    }
+                                    else {
+                                        navController.navigate(Screen.TwoPlayer.name)
                                     }
                                 }
                             )
                         }
 
-                        composable("single_player_screen") {
+                        composable(Screen.SinglePlayer.name) {
                             GameScreen(
                                 gameType = GameType.SINGLE_PLAYER,
-
+                                paddingValues = innerPadding
                             )
                         }
 
 
-                        composable("two_player_screen") {
+                        composable(Screen.TwoPlayer.name) {
                             GameScreen(
-                                gameType = GameType.TWO_PLAYER
+                                gameType = GameType.TWO_PLAYER,
+                                paddingValues = innerPadding
                             )
                         }
                     }

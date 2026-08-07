@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">" كونكت  4"</string>
-    <string name="single_player_vs_bot">لاعب واحد (ضد الجهاز)</string>
-    <string name="two_player_local">لاعبان (على نفس الجهاز)</string>
+    <string name="single_player_vs_bot">لعب فردي (ضد الجهاز)</string>
+    <string name="two_player_local">لعب ثنائي (على نفس الجهاز)</string>
     <string name="play_turn">العب الدور</string>
     <string name="red_player_turn">دور اللاعب الأحمر</string>
     <string name="orange_player_turn">دور اللاعب البرتقالي</string>
@@ -12,4 +12,13 @@
     <string name="it_is_a_draw">إنها تعادل!</string>
     <string name="red_player_wins_count">فوزات اللاعب الأحمر: %1$d</string>
     <string name="orange_player_wins_count">فوزات اللاعب البرتقالي: %1$d\n</string>
+    <string name="single_player_game">لعب فردي</string>
+    <string name="two_player_game">لعب ثنائي</string>
+    <string name="go_back">رجوع</string>
+    <string name="settings">الإعدادات</string>
+    <string name="exit_app">الخروج من التطبيق</string>
+    <string name="exit_game">الخروج من اللعبة</string>
+    <string name="are_you_sure_you_want_to_leave">هل أنت متأكد أنك تريد المغادرة؟</string>
+    <string name="exit">خروج</string>
+    <string name="cancel">إلغاء</string>
 </resources>
