@@ -30,11 +30,11 @@ import androidx.compose.ui.unit.dp
 import com.example.connect4game.R
 import com.example.connect4game.ui.screens.Screen
 
-val PastelRed = Color(0xFFFFB7B2)
-val PastelOrange = Color(0xFFFFDAC1)
-val PastelYellow = Color(0xFFFFE0AC)
-val PastelGreen = Color(0xFFE2F0CB)
-val PastelBlue = Color(0xFFC7CEEA)
+val TwilightBlue = Color(0xFF0F172A)
+val MidnightPurple = Color(0xFF2E1065)
+val NightMagenta = Color(0xFF4A044E)
+val DeepPlum = Color(0xFF311235)
+val AbyssNavy = Color(0xFF020617)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomTopBar(
@@ -44,11 +44,11 @@ fun CustomTopBar(
 ) {
     val rainbowGradientBrush = Brush.linearGradient(
         colors = listOf(
-            PastelRed,
-            PastelOrange,
-            PastelYellow,
-            PastelGreen,
-            PastelBlue
+            TwilightBlue,
+            MidnightPurple,
+            NightMagenta,
+            DeepPlum,
+            AbyssNavy
         )
     )
     var showExitDialog by remember { mutableStateOf(false) }
@@ -79,8 +79,8 @@ fun CustomTopBar(
         ),
         title = {
             when (currentScreen) {
-                Screen.SinglePlayer.name -> Text(stringResource(R.string.single_player_game), color = Color.Black)
-                Screen.TwoPlayer.name -> Text(stringResource(R.string.two_player_game), color = Color.Black)
+                Screen.SinglePlayer.name -> Text(stringResource(R.string.single_player_game), color = Color.White)
+                Screen.TwoPlayer.name -> Text(stringResource(R.string.two_player_game), color = Color.White)
             }
 
         },
@@ -90,20 +90,18 @@ fun CustomTopBar(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.go_back),
-                        tint = Color.Black
+                        tint = Color.Yellow
 
                     )
                 }
             }
             else {
 
-
-
                 IconButton(onClick = {showExitDialog = true}) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                         contentDescription = stringResource(R.string.exit_app),
-                        tint = Color.Black
+                        tint = Color.Yellow
                     )
                 }
             }
@@ -113,7 +111,7 @@ fun CustomTopBar(
                 Icon(
                     imageVector = Icons.Filled.Settings,
                     contentDescription = stringResource(R.string.settings),
-                    tint = Color.Black
+                    tint = Color.White.copy(alpha = 0.7f)
                 )
             }
         },

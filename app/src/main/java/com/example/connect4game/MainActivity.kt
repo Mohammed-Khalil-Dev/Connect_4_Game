@@ -3,10 +3,13 @@ package com.example.connect4game
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -30,7 +33,10 @@ class MainActivity : ComponentActivity() {
             val currentScreen = navBackStackEntry?.destination?.route
             Connect4GameTheme {
                 Scaffold(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize()
+                        .background(brush = Brush.linearGradient(colors = listOf(Color(0xFF331266),
+                            Color(0xFF0A0910)))),
+                    containerColor = Color.Transparent,
                     topBar = {
                         CustomTopBar(
                             currentScreen = currentScreen,
@@ -40,6 +46,7 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
+
                 ) { innerPadding ->
 
 
