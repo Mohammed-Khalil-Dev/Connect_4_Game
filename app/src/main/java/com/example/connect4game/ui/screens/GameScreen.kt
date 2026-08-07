@@ -26,15 +26,29 @@ import androidx.compose.ui.unit.dp
 import com.example.connect4game.R
 import com.example.connect4game.model.GameMatrix
 import com.example.connect4game.model.GameState
+import com.example.connect4game.model.GameStateDetails
 import com.example.connect4game.model.GameType
 import com.example.connect4game.model.GameUiState
 import com.example.connect4game.model.Piece
 import com.example.connect4game.model.checkGameState
 import com.example.connect4game.ui.components.BoardGrid
+import kotlin.properties.Delegates
+
+lateinit var soundPool: SoundPool
+var dropSoundId by Delegates.notNull<Int>()
 
 @Composable
 fun GameScreen(gameType: GameType,
                paddingValues: PaddingValues = PaddingValues(0.dp)) {
+    val context = LocalContext.current
+    soundPool = remember {
+        SoundPool.Builder()
+            .setMaxStreams(2)
+            .build()
+    }
+    dropSoundId = remember {
+        soundPool.load(context, R.raw.piece_drop_sound, 1)
+    }
     Column(modifier = Modifier
         .padding(paddingValues)
         .fillMaxSize(), verticalArrangement = Arrangement.Center,
@@ -55,25 +69,13 @@ fun SinglePlayerGameScreen() {
 }
 @Composable
 fun TwoPlayerGameScreen() {
-    val context = LocalContext.current
-    val soundPool = remember {
-        SoundPool.Builder()
-            .setMaxStreams(2)
-            .build()
-    }
-    val dropSoundId = remember {
-        soundPool.load(context, R.raw.piece_drop_sound, 1)
-    }
+
     var uiState by remember { mutableStateOf(GameUiState()) }
     val gameMatrix = remember { GameMatrix() }
     var redWins by remember { mutableIntStateOf(0) }
     var orangeWins by remember { mutableIntStateOf(0) }
 
-
-    Column {
-        Text(stringResource(R.string.red_player_wins_count, redWins), color = Color.Red)
-        Text(stringResource(R.string.orange_player_wins_count, orangeWins), color = colorResource(R.color.orange))
-    }
+    ScoreBoard(redWins = redWins, orangeWins = orangeWins)
 
     val currentBoard = remember(uiState.boardVersion) {
         gameMatrix.getBoard().map { column -> column.toList() }
@@ -84,31 +86,13 @@ fun TwoPlayerGameScreen() {
             uiState = uiState.copy(clickedColIndex = newSelectedCol)
         }
     }
-    when (uiState.gameStateDetails.gameState) {
-        GameState.ORANGE_WON ->  Text(stringResource(R.string.orange_player_wins), color = colorResource(R.color.orange))
-        GameState.RED_WON -> Text(stringResource(R.string.red_player_wins),  color = Color.Red)
-        GameState.DRAW ->  Text(stringResource(R.string.it_is_a_draw))
-        GameState.IN_PROGRESS -> {
-            if (uiState.currentPlayer == Piece.RED) {
-                Text(stringResource(R.string.red_player_turn),  color = Color.Red)
-            }
-            if (uiState.currentPlayer == Piece.ORANGE) {
-                Text(stringResource(R.string.orange_player_turn),  color = colorResource(R.color.orange))
-            }
-        }
-    }
+    GameStatusMessage(gameStateDetails = uiState.gameStateDetails, currentPlayer = uiState.currentPlayer)
 
     val canPlay = uiState.clickedColIndex != null && currentBoard[uiState.clickedColIndex!!][0] == Piece.EMPTY
             && uiState.gameStateDetails.gameState == GameState.IN_PROGRESS
 
-    Button(colors = buttonColors(
-        containerColor = if (uiState.currentPlayer == Piece.ORANGE) {
-            colorResource(R.color.orange)
-        } else {
-            Color.Red
-        }
-    ), enabled = canPlay, onClick = {
-        val col = uiState.clickedColIndex ?: return@Button
+    PlayTurnButton(currentPlayer = uiState.currentPlayer, canPlay = canPlay) {
+        val col = uiState.clickedColIndex ?: return@PlayTurnButton
         val landedRow = gameMatrix.dropPiece(col = col, piece = uiState.currentPlayer)
 
 
@@ -141,16 +125,64 @@ fun TwoPlayerGameScreen() {
             boardVersion = uiState.boardVersion + 1,
             clickedColIndex = null
         )
-    }) {
-        Text(stringResource(R.string.play_turn))
     }
 
-    Button(onClick = {
-
+    ResetGameButton {
         gameMatrix.clearBoard()
         uiState = GameUiState()
         uiState = uiState.copy(boardVersion = uiState.boardVersion + 1)
-    }) {
+    }
+}
+
+@Composable
+fun ScoreBoard(redWins: Int, orangeWins: Int) {
+    Column {
+        Text(stringResource(R.string.red_player_wins_count, redWins), color = Color.Red)
+        Text(stringResource(R.string.orange_player_wins_count, orangeWins), color = colorResource(R.color.orange))
+    }
+}
+
+@Composable
+fun GameStatusMessage(gameStateDetails: GameStateDetails, currentPlayer: Piece) {
+    when (gameStateDetails.gameState) {
+        GameState.ORANGE_WON -> Text(stringResource(R.string.orange_player_wins), color = colorResource(R.color.orange))
+        GameState.RED_WON -> Text(stringResource(R.string.red_player_wins), color = Color.Red)
+        GameState.DRAW -> Text(stringResource(R.string.it_is_a_draw))
+        GameState.IN_PROGRESS -> {
+            if (currentPlayer == Piece.RED) {
+                Text(stringResource(R.string.red_player_turn), color = Color.Red)
+            }
+            if (currentPlayer == Piece.ORANGE) {
+                Text(stringResource(R.string.orange_player_turn), color = colorResource(R.color.orange))
+            }
+        }
+    }
+}
+
+@Composable
+fun PlayTurnButton(
+    currentPlayer: Piece,
+    canPlay: Boolean,
+    onPlayTurn: () -> Unit
+) {
+    Button(
+        colors = buttonColors(
+            containerColor = if (currentPlayer == Piece.ORANGE) {
+                colorResource(R.color.orange)
+            } else {
+                Color.Red
+            }
+        ),
+        enabled = canPlay,
+        onClick = onPlayTurn
+    ) {
+        Text(stringResource(R.string.play_turn))
+    }
+}
+
+@Composable
+fun ResetGameButton(onReset: () -> Unit) {
+    Button(onClick = onReset) {
         Text(stringResource(R.string.reset_game))
     }
 }
@@ -159,6 +191,6 @@ fun TwoPlayerGameScreen() {
 @Composable
 @Preview(showBackground = true)
 fun PreviewGameScreen() {
-    GameScreen(GameType.TWO_PLAYER)
+    GameScreen(GameType.SINGLE_PLAYER)
 }
 

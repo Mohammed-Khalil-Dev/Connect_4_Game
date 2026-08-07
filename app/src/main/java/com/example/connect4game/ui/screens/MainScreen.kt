@@ -55,11 +55,12 @@ fun MainScreen(
     }
 }
 
-val boardBlueGradient = Brush.linearGradient(
-    colors = listOf(Color(0xFF1976D2), Color(0xFF00BCD4)) // Deep blue to bright cyan
-)
+
 @Composable
 fun GameTypesArea(onGameTypeSelected: (GameType) -> Unit) {
+    val boardBlueGradient = Brush.linearGradient(
+        colors = listOf(Color(0xFF1976D2), Color(0xFF00BCD4)) // Deep blue to bright cyan
+    )
     val buttonShape = RoundedCornerShape(50.dp)
 
     Button(
