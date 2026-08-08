@@ -101,13 +101,16 @@ fun CustomTopBar(
             }
         },
         actions = {
-            IconButton(onClick = onSettingsClicked) {
-                Icon(
-                    imageVector = Icons.Filled.Settings,
-                    contentDescription = stringResource(R.string.settings),
-                    tint = Color.White.copy(alpha = 0.7f)
-                )
+            if (currentScreen != Screen.Setting.name) {
+                IconButton(onClick = onSettingsClicked) {
+                    Icon(
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = stringResource(R.string.settings),
+                        tint = Color.White.copy(alpha = 0.7f)
+                    )
+                }
             }
+
         },
         modifier = Modifier
             .background(Color.Transparent)
