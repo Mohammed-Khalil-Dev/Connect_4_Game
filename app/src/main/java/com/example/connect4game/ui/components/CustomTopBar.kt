@@ -1,7 +1,7 @@
 package com.example.connect4game.ui.components
 
-import android.app.Activity
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -22,20 +22,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.connect4game.R
 import com.example.connect4game.ui.screens.Screen
 
-val TwilightBlue = Color(0xFF0F172A)
-val MidnightPurple = Color(0xFF2E1065)
-val NightMagenta = Color(0xFF4A044E)
-val DeepPlum = Color(0xFF311235)
-val AbyssNavy = Color(0xFF020617)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomTopBar(
@@ -43,17 +37,9 @@ fun CustomTopBar(
     onBackClicked: () -> Unit,
     onSettingsClicked: () -> Unit
 ) {
-    val rainbowGradientBrush = Brush.linearGradient(
-        colors = listOf(
-            TwilightBlue,
-            MidnightPurple,
-            NightMagenta,
-            DeepPlum,
-            AbyssNavy
-        )
-    )
+
     var showExitDialog by remember { mutableStateOf(false) }
-    val activity = LocalContext.current as? Activity
+    val activity = LocalActivity.current
 
     if (showExitDialog) {
         AlertDialog(
@@ -88,6 +74,7 @@ fun CustomTopBar(
             when (currentScreen) {
                 Screen.SinglePlayer.name -> Text(stringResource(R.string.single_player_game), color = Color.White)
                 Screen.TwoPlayer.name -> Text(stringResource(R.string.two_player_game), color = Color.White)
+                Screen.Setting.name -> Text(stringResource(R.string.settings), color = Color.White)
             }
 
         },
@@ -123,7 +110,7 @@ fun CustomTopBar(
             }
         },
         modifier = Modifier
-            .background(brush = rainbowGradientBrush)
+            .background(Color.Transparent)
             .padding(horizontal = 4.dp)
     )
 }

@@ -21,4 +21,9 @@
     <string name="are_you_sure_you_want_to_leave">هل أنت متأكد أنك تريد المغادرة؟</string>
     <string name="exit">خروج</string>
     <string name="cancel">إلغاء</string>
+    <string name="language">اللغة:</string>
+    <string name="sound">الصوت:</string>
+    <string name="mute">كتم الصوت</string>
+    <string name="max_volume">أقصى صوت</string>
+
 </resources>

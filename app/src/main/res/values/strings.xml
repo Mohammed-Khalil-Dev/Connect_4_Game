@@ -20,4 +20,10 @@
     <string name="are_you_sure_you_want_to_leave">Are you sure you want to leave?</string>
     <string name="exit">Exit</string>
     <string name="cancel">Cancel</string>
+    <string name="english" translatable="false">English</string>
+    <string name="arabic_word" translatable="false">عربي</string>
+    <string name="language">Language:</string>
+    <string name="sound">Sound:</string>
+    <string name="mute">Mute</string>
+    <string name="max_volume">Max Volume</string>
 </resources>

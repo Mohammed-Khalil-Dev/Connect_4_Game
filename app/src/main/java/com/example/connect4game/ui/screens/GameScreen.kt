@@ -1,6 +1,5 @@
 package com.example.connect4game.ui.screens
 
-import android.media.SoundPool
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -30,46 +29,38 @@ import com.example.connect4game.model.GameStateDetails
 import com.example.connect4game.model.GameType
 import com.example.connect4game.model.GameUiState
 import com.example.connect4game.model.Piece
+import com.example.connect4game.model.Sound
+import com.example.connect4game.model.SoundManager
 import com.example.connect4game.model.checkGameState
 import com.example.connect4game.ui.components.BoardGrid
-import kotlin.properties.Delegates
 
-const val DROP_PIECE_SOUND_VOLUME: Float = 0.7f
-lateinit var soundPool: SoundPool
-var dropSoundId by Delegates.notNull<Int>()
 
 @Composable
 fun GameScreen(gameType: GameType,
                paddingValues: PaddingValues = PaddingValues(0.dp)) {
     val context = LocalContext.current
-    soundPool = remember {
-        SoundPool.Builder()
-            .setMaxStreams(2)
-            .build()
-    }
-    dropSoundId = remember {
-        soundPool.load(context, R.raw.piece_drop_sound, 1)
-    }
+
+    val soundManager = remember { SoundManager(context) }
     Column(modifier = Modifier
         .padding(paddingValues)
         .fillMaxSize(), verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally) {
         when(gameType) {
-            GameType.SINGLE_PLAYER -> SinglePlayerGameScreen()
-            GameType.TWO_PLAYER -> TwoPlayerGameScreen()
+            GameType.SINGLE_PLAYER -> SinglePlayerGameScreen(soundManager = soundManager)
+            GameType.TWO_PLAYER -> TwoPlayerGameScreen(soundManager = soundManager)
         }
     }
 
 
 }
 @Composable
-fun SinglePlayerGameScreen() {
+fun SinglePlayerGameScreen(soundManager: SoundManager) {
     //todo: implement single player screen
 
 
 }
 @Composable
-fun TwoPlayerGameScreen() {
+fun TwoPlayerGameScreen(soundManager: SoundManager) {
 
     var uiState by remember { mutableStateOf(GameUiState()) }
     val gameMatrix = remember { GameMatrix() }
@@ -112,7 +103,6 @@ fun TwoPlayerGameScreen() {
             uiState.gameStateDetails
         }
 
-        soundPool.play(dropSoundId, DROP_PIECE_SOUND_VOLUME, DROP_PIECE_SOUND_VOLUME, 0, 0, 1f)
 
         val nextPlayer = if (newGameStateDetails.gameState == GameState.IN_PROGRESS) {
             if (uiState.currentPlayer == Piece.RED) Piece.ORANGE else Piece.RED
@@ -120,6 +110,7 @@ fun TwoPlayerGameScreen() {
             uiState.currentPlayer
         }
 
+        soundManager.playSound(Sound.DROP_PIECE)
 
         uiState = uiState.copy(
             gameStateDetails = newGameStateDetails,

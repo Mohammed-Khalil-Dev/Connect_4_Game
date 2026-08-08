@@ -46,7 +46,7 @@ fun MainScreen(
             Color.Magenta
         )
 
-        Text("Connect 4", style = TextStyle(
+        Text(stringResource(R.string.app_name), style = TextStyle(
             fontSize = 30.sp,
             brush = Brush.linearGradient(colors = rainbowColors)
         )
