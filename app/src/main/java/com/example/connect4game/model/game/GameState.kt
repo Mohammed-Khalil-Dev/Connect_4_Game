@@ -1,4 +1,4 @@
-package com.example.connect4game.model
+package com.example.connect4game.model.game
 
 enum class GameState {
     ORANGE_WON, RED_WON, DRAW, IN_PROGRESS

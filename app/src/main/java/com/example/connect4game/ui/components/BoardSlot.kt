@@ -17,7 +17,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.connect4game.R
-import com.example.connect4game.model.Piece
+import com.example.connect4game.model.game.Piece
 
 @Composable
 fun BoardSlot(piece: Piece, isWinning: Boolean = false) {

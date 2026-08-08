@@ -23,15 +23,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.connect4game.R
-import com.example.connect4game.model.GameMatrix
-import com.example.connect4game.model.GameState
-import com.example.connect4game.model.GameStateDetails
-import com.example.connect4game.model.GameType
-import com.example.connect4game.model.GameUiState
-import com.example.connect4game.model.Piece
-import com.example.connect4game.model.Sound
-import com.example.connect4game.model.SoundManager
-import com.example.connect4game.model.checkGameState
+import com.example.connect4game.model.game.GameMatrix
+import com.example.connect4game.model.game.GameState
+import com.example.connect4game.model.game.GameStateDetails
+import com.example.connect4game.model.game.GameType
+import com.example.connect4game.model.game.GameUiState
+import com.example.connect4game.model.game.Piece
+import com.example.connect4game.model.settings.audio.Sound
+import com.example.connect4game.model.settings.audio.SoundManager
+import com.example.connect4game.model.game.checkGameState
 import com.example.connect4game.ui.components.BoardGrid
 
 

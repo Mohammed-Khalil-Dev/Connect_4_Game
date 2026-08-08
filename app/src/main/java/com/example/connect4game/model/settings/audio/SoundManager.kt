@@ -1,4 +1,4 @@
-package com.example.connect4game.model
+package com.example.connect4game.model.settings.audio
 
 import android.content.Context
 import android.media.SoundPool

@@ -1,4 +1,4 @@
-package com.example.connect4game.model
+package com.example.connect4game.model.game
 
 const val CONNECTED_PIECES_TO_WIN = 4
 

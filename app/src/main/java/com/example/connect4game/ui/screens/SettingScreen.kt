@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.os.LocaleListCompat
 import com.example.connect4game.R
-import com.example.connect4game.model.AppLanguage
-import com.example.connect4game.model.SoundManager
+import com.example.connect4game.model.settings.language.AppLanguage
+import com.example.connect4game.model.settings.audio.SoundManager
 import com.example.connect4game.ui.theme.Connect4GameTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

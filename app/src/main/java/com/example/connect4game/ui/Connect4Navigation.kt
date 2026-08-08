@@ -12,7 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.connect4game.model.GameType
+import com.example.connect4game.model.game.GameType
 import com.example.connect4game.ui.components.CustomTopBar
 import com.example.connect4game.ui.screens.GameScreen
 import com.example.connect4game.ui.screens.MainScreen
