@@ -9,11 +9,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,50 +21,59 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.connect4game.R
-import com.example.connect4game.model.game.GameMatrix
+import com.example.connect4game.model.game.GameScreenViewModel
 import com.example.connect4game.model.game.GameState
 import com.example.connect4game.model.game.GameStateDetails
 import com.example.connect4game.model.game.GameType
-import com.example.connect4game.model.game.GameUiState
 import com.example.connect4game.model.game.Piece
+import com.example.connect4game.model.game.ScoreManager
+import com.example.connect4game.model.game.checkGameState
 import com.example.connect4game.model.settings.audio.Sound
 import com.example.connect4game.model.settings.audio.SoundManager
-import com.example.connect4game.model.game.checkGameState
 import com.example.connect4game.ui.components.BoardGrid
+import kotlinx.coroutines.launch
 
 
 @Composable
-fun GameScreen(gameType: GameType,
-               paddingValues: PaddingValues = PaddingValues(0.dp)) {
+fun GameScreen(
+    gameType: GameType,
+    paddingValues: PaddingValues = PaddingValues(0.dp),
+    singlePlayerViewModel: GameScreenViewModel = viewModel(),
+    twoPlayerViewModel: GameScreenViewModel = viewModel()
+) {
     val context = LocalContext.current
-
     val soundManager = remember { SoundManager(context) }
+    val scoreManager = remember { ScoreManager(context) }
+
+
+
     Column(modifier = Modifier
         .padding(paddingValues)
         .fillMaxSize(), verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally) {
+
         when(gameType) {
-            GameType.SINGLE_PLAYER -> SinglePlayerGameScreen(soundManager = soundManager)
-            GameType.TWO_PLAYER -> TwoPlayerGameScreen(soundManager = soundManager)
+            GameType.SINGLE_PLAYER -> SinglePlayerGameScreen(soundManager = soundManager, viewModel = singlePlayerViewModel, scoreManager = scoreManager)
+            GameType.TWO_PLAYER -> TwoPlayerGameScreen(soundManager = soundManager, viewModel = twoPlayerViewModel, scoreManager = scoreManager)
         }
     }
-
-
 }
 @Composable
-fun SinglePlayerGameScreen(soundManager: SoundManager) {
+fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenViewModel = viewModel(), scoreManager: ScoreManager) {
     //todo: implement single player screen
 
 
 }
 @Composable
-fun TwoPlayerGameScreen(soundManager: SoundManager) {
+fun TwoPlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenViewModel = viewModel(), scoreManager: ScoreManager) {
 
-    var uiState by remember { mutableStateOf(GameUiState()) }
-    val gameMatrix = remember { GameMatrix() }
-    var redWins by remember { mutableIntStateOf(0) }
-    var orangeWins by remember { mutableIntStateOf(0) }
+    val uiState by viewModel.uiState.collectAsState()
+    val gameMatrix = viewModel.gameMatrix
+    val scope = rememberCoroutineScope()
+    val redWins by scoreManager.getWinsFlow(GameType.TWO_PLAYER, Piece.RED).collectAsState(initial = 0)
+    val orangeWins by scoreManager.getWinsFlow(GameType.TWO_PLAYER, Piece.ORANGE).collectAsState(initial = 0)
 
     ScoreBoard(redWins = redWins, orangeWins = orangeWins)
 
@@ -75,7 +83,7 @@ fun TwoPlayerGameScreen(soundManager: SoundManager) {
 
     BoardGrid(pieces = currentBoard, selectedColumn = uiState.clickedColIndex, winningCells = uiState.gameStateDetails.winningCells) { newSelectedCol ->
         if (uiState.gameStateDetails.gameState == GameState.IN_PROGRESS) {
-            uiState = uiState.copy(clickedColIndex = newSelectedCol)
+            viewModel.updateUiState(newSelectedColumn = newSelectedCol)
         }
     }
     GameStatusMessage(gameStateDetails = uiState.gameStateDetails, currentPlayer = uiState.currentPlayer)
@@ -93,8 +101,8 @@ fun TwoPlayerGameScreen(soundManager: SoundManager) {
                 landedRow, col)
 
             when(details.gameState) {
-                GameState.RED_WON -> redWins++
-                GameState.ORANGE_WON -> orangeWins++
+                GameState.RED_WON -> scope.launch { scoreManager.incrementWins(GameType.TWO_PLAYER, Piece.RED) }
+                GameState.ORANGE_WON -> scope.launch { scoreManager.incrementWins(GameType.TWO_PLAYER, Piece.ORANGE) }
                 else -> {}
             }
            details
@@ -111,20 +119,10 @@ fun TwoPlayerGameScreen(soundManager: SoundManager) {
         }
 
         soundManager.playSound(Sound.DROP_PIECE)
-
-        uiState = uiState.copy(
-            gameStateDetails = newGameStateDetails,
-            currentPlayer = nextPlayer,
-            boardVersion = uiState.boardVersion + 1,
-            clickedColIndex = null
-        )
+        viewModel.updateUiState(newGameStateDetails = newGameStateDetails, nextPlayer = nextPlayer)
     }
 
-    ResetGameButton {
-        gameMatrix.clearBoard()
-        uiState = GameUiState()
-        uiState = uiState.copy(boardVersion = uiState.boardVersion + 1)
-    }
+    ResetGameButton { viewModel.resetGame() }
 }
 
 @Composable

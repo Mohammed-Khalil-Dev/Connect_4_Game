@@ -25,5 +25,14 @@
     <string name="sound">الصوت:</string>
     <string name="mute">كتم الصوت</string>
     <string name="max_volume">أقصى صوت</string>
+    <string name="reset_single_player_wins">إعادة تعيين انتصارات اللعب الفردي</string>
+    <string name="reset_two_player_wins">إعادة تعيين انتصارات اللعب الثنائي</string>
+    <string name="game_data">بيانات اللعبة:</string>
+    <string name="single_player">اللعب الفردي</string>
+    <string name="two_player">اللعب الثنائي</string>
+    <string name="confirm">تأكيد</string>
+    <string name="delete_wins_message">هل أنت متأكد أنك تريد حذف جميع انتصارات %1$s؟ لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="reset_scores">إعادة تعيين النقاط</string>
+    <string name="scores_reset">تم إعادة تعيين النقاط بنجاح!</string>
 
 </resources>

@@ -8,6 +8,4 @@ data class GameUiState(
     ),
     val clickedColIndex: Int? = null,
     val boardVersion: Int = 0,
-
-
     )

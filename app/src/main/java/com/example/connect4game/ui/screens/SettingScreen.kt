@@ -1,5 +1,6 @@
 package com.example.connect4game.ui.screens
 
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,6 +13,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
@@ -35,8 +39,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.os.LocaleListCompat
 import com.example.connect4game.R
-import com.example.connect4game.model.settings.language.AppLanguage
+import com.example.connect4game.model.game.GameType
+import com.example.connect4game.model.game.ScoreManager
 import com.example.connect4game.model.settings.audio.SoundManager
+import com.example.connect4game.model.settings.language.AppLanguage
 import com.example.connect4game.ui.theme.Connect4GameTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -47,6 +53,7 @@ fun SettingScreen(
     paddingValues: PaddingValues = PaddingValues(0.dp)) {
     val context = LocalContext.current
     val soundManager: SoundManager = remember { SoundManager(context = context) }
+    val scoreManager: ScoreManager = remember { ScoreManager(context) }
     // Check the app current language
     val configuration = LocalConfiguration.current
     val currentLangTag = configuration.locales[0].language
@@ -54,6 +61,7 @@ fun SettingScreen(
     val coroutineScope = rememberCoroutineScope()
     // observe volumeFlow. trigger on flow value change
     val currentVolume by soundManager.volumeFlow.collectAsState(initial = SoundManager.DEFAULT_SOUND_VOLUME)
+    var gameTypeToReset by remember { mutableStateOf<GameType?>(null) }
 
 
     var selectedLanguage by remember { mutableStateOf(initialLanguage) }
@@ -119,6 +127,38 @@ fun SettingScreen(
                 tint = Color.White
             )
         }
+        Spacer(modifier = Modifier.height(40.dp))
+        Text(text = stringResource(R.string.game_data), fontSize = 20.sp, color = Color.White)
+        Spacer(modifier = Modifier.height(10.dp))
+        Column(horizontalAlignment = Alignment.Start) {
+            ResetWinsButton(text = stringResource(R.string.reset_single_player_wins)) {
+                gameTypeToReset = GameType.SINGLE_PLAYER
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            ResetWinsButton(text = stringResource(R.string.reset_two_player_wins)) {
+                gameTypeToReset = GameType.TWO_PLAYER
+            }
+
+        }
+
+        gameTypeToReset?.let { type ->
+            ResetAlertDialog(
+                gameType = type,
+                onConfirm = {
+                    coroutineScope.launch {
+                        scoreManager.resetWins(gameType = type)
+                        Toast.makeText(context,
+                            context.getString(R.string.scores_reset), Toast.LENGTH_SHORT).show()
+                    }
+
+                },
+                onDismiss = {
+                    gameTypeToReset = null
+                }
+            )
+        }
+
+
 
 
 
@@ -149,6 +189,48 @@ fun LanguageRadioButton(
             color = Color.White
         )
     }
+}
+@Composable
+fun ResetWinsButton(text: String, onClick: () -> Unit) {
+    Button(onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0xFFB30000),
+            contentColor = Color.White)) {
+        Text(text = text)
+    }
+}
+@Composable
+fun ResetAlertDialog(
+    gameType: GameType,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val gameTypeToReset = when(gameType) {
+        GameType.SINGLE_PLAYER -> stringResource(R.string.single_player)
+        GameType.TWO_PLAYER -> stringResource(R.string.two_player)
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(R.string.reset_scores)) },
+        text = { Text(text = stringResource(
+            R.string.delete_wins_message,
+            gameTypeToReset
+        )) },
+        confirmButton = {
+            Button(onClick = {
+                onConfirm()
+                onDismiss()
+            }) {
+                Text(stringResource(R.string.confirm))
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
 }
 
 @Composable

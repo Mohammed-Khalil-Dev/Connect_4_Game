@@ -26,4 +26,13 @@
     <string name="sound">Sound:</string>
     <string name="mute">Mute</string>
     <string name="max_volume">Max Volume</string>
+    <string name="reset_single_player_wins">Reset Single Player Wins</string>
+    <string name="reset_two_player_wins">Reset Two Player Wins</string>
+    <string name="game_data">Game Data:</string>
+    <string name="single_player">single player</string>
+    <string name="two_player">two player</string>
+    <string name="confirm">Confirm</string>
+    <string name="delete_wins_message">Are you sure you want to delete all %1$s wins? This cannot be undone.</string>
+    <string name="reset_scores">Reset Scores</string>
+    <string name="scores_reset">Scores reset!</string>
 </resources>

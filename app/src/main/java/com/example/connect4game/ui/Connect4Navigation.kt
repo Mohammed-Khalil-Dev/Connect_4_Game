@@ -8,10 +8,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.connect4game.model.game.GameScreenViewModel
 import com.example.connect4game.model.game.GameType
 import com.example.connect4game.ui.components.CustomTopBar
 import com.example.connect4game.ui.screens.GameScreen
@@ -40,6 +42,9 @@ fun Connect4Navigation() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     // get the current route(screen)
     val currentScreen = navBackStackEntry?.destination?.route
+
+    val singlePlayerViewModel: GameScreenViewModel = viewModel(key = GameType.SINGLE_PLAYER.name)
+    val twoPlayerViewModel: GameScreenViewModel = viewModel(key = GameType.TWO_PLAYER.name)
     Scaffold(
         modifier = Modifier.fillMaxSize()
             .background(brush = twilightGradientBrush),
@@ -80,7 +85,9 @@ fun Connect4Navigation() {
             composable(route = Screen.SinglePlayer.name) {
                 GameScreen(
                     gameType = GameType.SINGLE_PLAYER,
-                    paddingValues = innerPadding
+                    paddingValues = innerPadding,
+                    singlePlayerViewModel = singlePlayerViewModel,
+                    twoPlayerViewModel = twoPlayerViewModel
                 )
             }
 
@@ -88,7 +95,9 @@ fun Connect4Navigation() {
             composable(route = Screen.TwoPlayer.name) {
                 GameScreen(
                     gameType = GameType.TWO_PLAYER,
-                    paddingValues = innerPadding
+                    paddingValues = innerPadding,
+                    singlePlayerViewModel = singlePlayerViewModel,
+                    twoPlayerViewModel = twoPlayerViewModel
                 )
             }
 
