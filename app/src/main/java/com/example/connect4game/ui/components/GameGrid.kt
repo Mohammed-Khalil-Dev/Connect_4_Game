@@ -10,8 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.connect4game.model.game.BoardConfig
-import com.example.connect4game.model.game.Piece
+import com.example.connect4game.model.game.core.BoardConfig
+import com.example.connect4game.model.game.types.Piece
 
 @Composable
 fun BoardGrid(pieces: List<List<Piece>>,

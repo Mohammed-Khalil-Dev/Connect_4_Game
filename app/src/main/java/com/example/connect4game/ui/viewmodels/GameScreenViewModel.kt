@@ -1,6 +1,10 @@
-package com.example.connect4game.model.game
+package com.example.connect4game.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
+import com.example.connect4game.model.game.core.GameMatrix
+import com.example.connect4game.model.game.state.GameStateDetails
+import com.example.connect4game.model.game.state.GameUiState
+import com.example.connect4game.model.game.types.Piece
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

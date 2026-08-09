@@ -1,4 +1,8 @@
-package com.example.connect4game.model.game
+package com.example.connect4game.model.game.core
+
+import com.example.connect4game.model.game.types.Piece
+import com.example.connect4game.model.game.state.GameState
+import com.example.connect4game.model.game.state.GameStateDetails
 
 const val CONNECTED_PIECES_TO_WIN = 4
 

@@ -1,4 +1,4 @@
-package com.example.connect4game.model.game
+package com.example.connect4game.model.game.state
 
 data class GameStateDetails(
     val gameState: GameState = GameState.IN_PROGRESS,

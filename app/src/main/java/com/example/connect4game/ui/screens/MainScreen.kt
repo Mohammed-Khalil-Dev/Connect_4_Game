@@ -24,7 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.connect4game.R
-import com.example.connect4game.model.game.GameType
+import com.example.connect4game.model.game.types.GameType
 
 
 @Composable

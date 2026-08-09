@@ -1,4 +1,6 @@
-package com.example.connect4game.model.game
+package com.example.connect4game.model.game.state
+
+import com.example.connect4game.model.game.types.Piece
 
 data class GameUiState(
     val currentPlayer: Piece = listOf(Piece.RED, Piece.ORANGE).random(),

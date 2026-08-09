@@ -1,4 +1,6 @@
-package com.example.connect4game.model.game
+package com.example.connect4game.model.game.core
+
+import com.example.connect4game.model.game.types.Piece
 
 class GameMatrix {
     private val grid: MutableList<MutableList<Piece>> = MutableList(BoardConfig.NUMBER_OF_COLUMNS) {

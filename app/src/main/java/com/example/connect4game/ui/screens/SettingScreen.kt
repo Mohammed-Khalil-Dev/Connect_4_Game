@@ -39,8 +39,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.os.LocaleListCompat
 import com.example.connect4game.R
-import com.example.connect4game.model.game.GameType
-import com.example.connect4game.model.game.ScoreManager
+import com.example.connect4game.model.game.types.GameType
+import com.example.connect4game.data.ScoreManager
 import com.example.connect4game.model.settings.audio.SoundManager
 import com.example.connect4game.model.settings.language.AppLanguage
 import com.example.connect4game.ui.theme.Connect4GameTheme

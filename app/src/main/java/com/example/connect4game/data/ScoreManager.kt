@@ -1,10 +1,12 @@
-package com.example.connect4game.model.game
+package com.example.connect4game.data
 
 import android.content.Context
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.connect4game.model.game.types.GameType
+import com.example.connect4game.model.game.types.Piece
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 

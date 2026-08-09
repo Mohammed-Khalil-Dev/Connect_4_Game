@@ -1,4 +1,4 @@
-package com.example.connect4game.model.game
+package com.example.connect4game.model.game.core
 
 object BoardConfig {
     const val NUMBER_OF_COLUMNS = 7
