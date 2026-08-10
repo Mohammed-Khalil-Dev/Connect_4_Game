@@ -19,7 +19,7 @@ fun BoardGrid(pieces: List<List<Piece>>,
               winningCells: List<Pair<Int, Int>>,
               onColumnClick: (Int) -> Unit
 ) {
-    Row(Modifier.fillMaxWidth().background(Color.Blue)) {
+    Row(Modifier.fillMaxWidth().background(Color(0xFF3A1C5E))) {
 
         pieces.forEachIndexed { colIndex, columnList ->
 

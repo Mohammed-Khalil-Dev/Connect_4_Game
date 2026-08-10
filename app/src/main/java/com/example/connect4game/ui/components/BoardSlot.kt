@@ -25,7 +25,7 @@ fun BoardSlot(piece: Piece, isWinning: Boolean = false) {
     val circleColor = when (piece) {
         Piece.RED -> Color.Red
         Piece.ORANGE -> colorResource(R.color.orange)
-        Piece.EMPTY -> Color.White
+        Piece.EMPTY -> Color.Black.copy(alpha = 0.5f)
     }
 
 // Add these to your imports if they aren't there yet:
@@ -63,7 +63,7 @@ fun BoardSlot(piece: Piece, isWinning: Boolean = false) {
 
     Box(contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxWidth().aspectRatio(1f)
-            .background(Color.Blue)) {
+            .background(Color(0xFF3A1C5E))) {
 
         Box(modifier = Modifier
             .fillMaxSize(0.8f)
@@ -90,5 +90,5 @@ fun BoardSlot(piece: Piece, isWinning: Boolean = false) {
 @Composable
 fun PreviewBoardSlot() {
 
-    BoardSlot(Piece.ORANGE, isWinning = true)
+    BoardSlot(Piece.EMPTY, isWinning = false)
 }
