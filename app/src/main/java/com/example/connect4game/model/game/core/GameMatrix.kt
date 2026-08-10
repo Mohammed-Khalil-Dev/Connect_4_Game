@@ -37,6 +37,17 @@ class GameMatrix {
         return grid.indices.none { colIndex -> getPiece(row = 0, colIndex) == Piece.EMPTY }
     }
 
+    fun getAvailableColumnsIndex(): List<Int> {
+        val availableColumns = grid.indices.filter { colIndex ->
+            getPiece(row = 0, col = colIndex) == Piece.EMPTY
+        }
+        return availableColumns
+    }
+
+    fun removePiece(row: Int, col: Int) {
+        grid[col][row] = Piece.EMPTY
+    }
+
     fun getBoard(): List<List<Piece>> {
         return grid
     }

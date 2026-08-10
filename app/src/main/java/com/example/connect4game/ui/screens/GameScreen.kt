@@ -27,6 +27,7 @@ import com.example.connect4game.R
 import com.example.connect4game.data.ScoreManager
 import com.example.connect4game.model.game.core.GameMatrix
 import com.example.connect4game.model.game.core.checkGameState
+import com.example.connect4game.model.game.core.findBestMove
 import com.example.connect4game.model.game.state.GameState
 import com.example.connect4game.model.game.state.GameStateDetails
 import com.example.connect4game.model.game.types.GameType
@@ -35,9 +36,9 @@ import com.example.connect4game.model.settings.audio.Sound
 import com.example.connect4game.model.settings.audio.SoundManager
 import com.example.connect4game.ui.components.BoardGrid
 import com.example.connect4game.ui.viewmodels.GameScreenViewModel
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.withContext
 
 
 @Composable
@@ -111,7 +112,6 @@ fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenView
         if (uiState.currentPlayer == botPiece && uiState.gameStateDetails.gameState == GameState.IN_PROGRESS) {
             playBotTurn(
                 gameMatrix = gameMatrix,
-                currentBoard = currentBoard,
                 botPiece = botPiece,
                 playerPiece = playerPiece,
                 scoreManager = scoreManager,
@@ -230,27 +230,25 @@ fun TwoPlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenViewMod
 
 suspend fun playBotTurn(
     gameMatrix: GameMatrix,
-    currentBoard: List<List<Piece>>,
     botPiece: Piece,
     playerPiece: Piece,
     scoreManager: ScoreManager,
     soundManager: SoundManager,
     viewModel: GameScreenViewModel
 ) {
-    delay(600.milliseconds)
 
-    val availableColumns = currentBoard.indices.filter { colIndex ->
-        gameMatrix.getPiece(row = 0, col = colIndex) == Piece.EMPTY
-    }
 
-    val randomColIndex = availableColumns.randomOrNull()
+    val availableColumns = gameMatrix.getAvailableColumnsIndex()
 
-    if (randomColIndex != null) {
+    if (availableColumns.isNotEmpty()) {
 
-        val landedRow = gameMatrix.dropPiece(col = randomColIndex, piece = botPiece)
+        val bestColIndex = withContext(Dispatchers.Default) {
+            findBestMove(gameMatrix)
+        }
+        val landedRow = gameMatrix.dropPiece(col = bestColIndex, piece = botPiece)
 
         val newGameStateDetails = if (landedRow != null) {
-            val details: GameStateDetails = checkGameState(gameMatrix, botPiece, landedRow, randomColIndex)
+            val details: GameStateDetails = checkGameState(gameMatrix, botPiece, landedRow, bestColIndex)
             if (details.gameState == GameState.RED_WON) {
                 scoreManager.incrementWins(GameType.SINGLE_PLAYER, botPiece)
             }
@@ -259,9 +257,7 @@ suspend fun playBotTurn(
             GameStateDetails()
         }
 
-
         val nextPlayer = if (newGameStateDetails.gameState == GameState.IN_PROGRESS) playerPiece else botPiece
-
 
         soundManager.playSound(Sound.DROP_PIECE)
         viewModel.updateUiState(newGameStateDetails = newGameStateDetails, nextPlayer = nextPlayer)

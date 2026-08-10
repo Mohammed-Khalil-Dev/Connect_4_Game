@@ -1,31 +1,27 @@
 package com.example.connect4game.model.game.core
 
-import com.example.connect4game.model.game.types.Piece
 import com.example.connect4game.model.game.state.GameState
 import com.example.connect4game.model.game.state.GameStateDetails
+import com.example.connect4game.model.game.types.Piece
 
 const val CONNECTED_PIECES_TO_WIN = 4
 
-const val DIRECTION_UP = -1
-const val DIRECTION_DOWN = 1
-const val DIRECTION_LEFT = -1
-const val DIRECTION_RIGHT = 1
-const val DIRECTION_NONE = 0
+
 fun checkGameState(currentBoard: GameMatrix, currentPiece: Piece, currentRow: Int, currentCol: Int): GameStateDetails {
-    val upCells = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, DIRECTION_UP, DIRECTION_NONE)
-    val downCells = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, DIRECTION_DOWN, DIRECTION_NONE)
+    val upCells = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, direction = Direction.UP)
+    val downCells = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, direction = Direction.DOWN)
     val verticalCells = upCells + downCells + Pair(currentRow, currentCol)
 
-    val leftCells = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, DIRECTION_NONE, DIRECTION_LEFT)
-    val rightCells = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, DIRECTION_NONE, DIRECTION_RIGHT)
+    val leftCells = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, direction = Direction.LEFT)
+    val rightCells = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, direction = Direction.RIGHT)
     val horizontalCells = leftCells + rightCells + Pair(currentRow, currentCol)
 
-    val diagUpLeft = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, DIRECTION_UP, DIRECTION_LEFT)
-    val diagDownRight = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, DIRECTION_DOWN, DIRECTION_RIGHT)
+    val diagUpLeft = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, direction = Direction.UP_LEFT)
+    val diagDownRight = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, direction = Direction.DOWN_RIGHT)
     val diagonal1Cells = diagUpLeft + diagDownRight + Pair(currentRow, currentCol)
 
-    val diagDownLeft = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, DIRECTION_DOWN, DIRECTION_LEFT)
-    val diagUpRight = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, DIRECTION_UP, DIRECTION_RIGHT)
+    val diagDownLeft = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, direction = Direction.DOWN_LEFT)
+    val diagUpRight = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, direction = Direction.UP_RIGHT)
     val diagonal2Cells = diagDownLeft + diagUpRight + Pair(currentRow, currentCol)
 
     val winningState = if (currentPiece == Piece.RED) GameState.RED_WON else GameState.ORANGE_WON
@@ -59,8 +55,8 @@ fun checkGameState(currentBoard: GameMatrix, currentPiece: Piece, currentRow: In
  * @param piece The specific piece type (color) being checked for a match.
  * @param startRow The starting row index where the piece was dropped.
  * @param startCol The starting column index where the piece was dropped.
- * @param rowDelta The row step direction (-1 for up, 0 for none, 1 for down).
- * @param colDelta The column step direction (-1 for left, 0 for none, 1 for right).
+ * @param maxConnections The maximum number of consecutive steps to check (defaults to CONNECTED_PIECES_TO_WIN).
+ * @param direction The Direction enum dictating the row and column step adjustments.
  * @return A list of row/column pairs for matching consecutive pieces found stepping in that direction.
  */
 fun getCellsInDirection(
@@ -68,14 +64,14 @@ fun getCellsInDirection(
     piece: Piece,
     startRow: Int,
     startCol: Int,
-    rowDelta: Int = 0,
-    colDelta: Int = 0
+    maxConnections: Int = CONNECTED_PIECES_TO_WIN,
+    direction: Direction
 ): List<Pair<Int, Int>> {
     val winningCells: MutableList<Pair<Int, Int>> = mutableListOf()
     // Check steps away from the starting piece
-    for (step in 1 until CONNECTED_PIECES_TO_WIN) {
-        val row = startRow + (rowDelta * step)
-        val col = startCol + (colDelta * step)
+    for (step in 1 until maxConnections) {
+        val row = startRow + (direction.rowDelta * step)
+        val col = startCol + (direction.colDelta * step)
 
         // Make sure we stay inside the board bounds
         if (row in 0 until BoardConfig.NUMBER_OF_ROWS &&

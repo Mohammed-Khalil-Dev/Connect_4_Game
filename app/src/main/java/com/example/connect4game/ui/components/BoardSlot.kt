@@ -28,17 +28,12 @@ fun BoardSlot(piece: Piece, isWinning: Boolean = false) {
         Piece.EMPTY -> Color.Black.copy(alpha = 0.5f)
     }
 
-// Add these to your imports if they aren't there yet:
-// import androidx.compose.ui.graphics.Brush
-// import androidx.compose.ui.graphics.drawscope.Stroke
+
 
     val winningModifier = if (isWinning) {
         Modifier.drawWithContent {
 
             drawContent()
-
-
-
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
@@ -89,6 +84,5 @@ fun BoardSlot(piece: Piece, isWinning: Boolean = false) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewBoardSlot() {
-
     BoardSlot(Piece.EMPTY, isWinning = false)
 }
