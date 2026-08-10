@@ -36,5 +36,9 @@
     <string name="scores_reset">تم إعادة تعيين النقاط بنجاح!</string>
     <string name="bot_wins_count">الحاسوب: %1$d</string>
     <string name="you_wins_count">أنت: %1$d</string>
+    <string name="your_turn">دورك</string>
+    <string name="bots_turn">دور الحاسوب</string>
+    <string name="you_win">لقد فزت!</string>
+    <string name="bot_wins">فاز الحاسوب!</string>
 
 </resources>

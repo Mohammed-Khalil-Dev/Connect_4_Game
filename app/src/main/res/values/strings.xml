@@ -37,4 +37,8 @@
     <string name="scores_reset">Scores reset!</string>
     <string name="bot_wins_count" >Bot: %1$d</string>
     <string name="you_wins_count" >You: %1$d</string>
+    <string name="your_turn" >Your Turn</string>
+    <string name="bots_turn" >Bot\'s Turn</string>
+    <string name="you_win" >You Win!</string>
+    <string name="bot_wins" >Bot Wins!</string>
 </resources>
