@@ -35,4 +35,6 @@
     <string name="delete_wins_message">Are you sure you want to delete all %1$s wins? This cannot be undone.</string>
     <string name="reset_scores">Reset Scores</string>
     <string name="scores_reset">Scores reset!</string>
+    <string name="bot_wins_count" >Bot: %1$d</string>
+    <string name="you_wins_count" >You: %1$d</string>
 </resources>

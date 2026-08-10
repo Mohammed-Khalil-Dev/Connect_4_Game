@@ -28,11 +28,9 @@ class SoundManager(private val context: Context) {
     var soundVolume: Float = 1f
         private set
 
-    private val soundPool: SoundPool = SoundPool.Builder()
-        .setMaxStreams(1)
-        .build()
+    private var soundPool: SoundPool? = null
 
-    private val dropSoundId = soundPool.load(context, R.raw.piece_drop_sound, 1)
+    private var dropSoundId: Int? = null
 
     // broadcast changes to observers
     val volumeFlow: Flow<Float> = context.soundDataStore.data
@@ -50,11 +48,21 @@ class SoundManager(private val context: Context) {
             val preferencesMap: Preferences = context.soundDataStore.data.first()
             soundVolume = preferencesMap[VOLUME_KEY] ?: DEFAULT_SOUND_VOLUME
         }
+        soundPool = try {
+            SoundPool.Builder()
+                .setMaxStreams(5)
+                .build()
+
+        }
+        catch (_: Exception) {
+            null
+        }
+        dropSoundId = soundPool?.load(context, R.raw.piece_drop_sound, 1)
     }
 
     fun playSound(sound: Sound) {
         when(sound) {
-            Sound.DROP_PIECE -> soundPool.play(dropSoundId, soundVolume, soundVolume, 0, 0, 1f)
+            Sound.DROP_PIECE -> soundPool?.play(dropSoundId!!, soundVolume, soundVolume, 0, 0, 1f)
         }
     }
 

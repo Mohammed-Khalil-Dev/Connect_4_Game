@@ -34,5 +34,7 @@
     <string name="delete_wins_message">هل أنت متأكد أنك تريد حذف جميع انتصارات %1$s؟ لا يمكن التراجع عن هذا الإجراء.</string>
     <string name="reset_scores">إعادة تعيين النقاط</string>
     <string name="scores_reset">تم إعادة تعيين النقاط بنجاح!</string>
+    <string name="bot_wins_count">الحاسوب: %1$d</string>
+    <string name="you_wins_count">أنت: %1$d</string>
 
 </resources>

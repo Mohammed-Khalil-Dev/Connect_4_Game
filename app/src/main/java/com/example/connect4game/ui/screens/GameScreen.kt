@@ -9,6 +9,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -23,17 +24,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.connect4game.R
-import com.example.connect4game.ui.viewmodels.GameScreenViewModel
+import com.example.connect4game.data.ScoreManager
+import com.example.connect4game.model.game.core.GameMatrix
+import com.example.connect4game.model.game.core.checkGameState
 import com.example.connect4game.model.game.state.GameState
 import com.example.connect4game.model.game.state.GameStateDetails
 import com.example.connect4game.model.game.types.GameType
 import com.example.connect4game.model.game.types.Piece
-import com.example.connect4game.data.ScoreManager
-import com.example.connect4game.model.game.core.checkGameState
 import com.example.connect4game.model.settings.audio.Sound
 import com.example.connect4game.model.settings.audio.SoundManager
 import com.example.connect4game.ui.components.BoardGrid
+import com.example.connect4game.ui.viewmodels.GameScreenViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 
 @Composable
@@ -62,12 +66,91 @@ fun GameScreen(
 }
 @Composable
 fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenViewModel = viewModel(), scoreManager: ScoreManager) {
-    //todo: implement single player screen
+
+    val playerPiece: Piece = Piece.ORANGE
+    val botPiece: Piece = Piece.RED
+
+    val uiState by viewModel.uiState.collectAsState()
+    val gameMatrix = viewModel.gameMatrix
+    val scope = rememberCoroutineScope()
+    val playerWins by scoreManager.getWinsFlow(GameType.SINGLE_PLAYER, piece = playerPiece).collectAsState(initial = 0)
+    val botWins by scoreManager.getWinsFlow(GameType.SINGLE_PLAYER, piece = botPiece).collectAsState(initial = 0)
+
+    ScoreBoard(
+        redWins = botWins,
+        orangeWins = playerWins,
+        playerOneLabelId = R.string.bot_wins_count,
+        playerTwoLabelId = R.string.you_wins_count
+    )
 
 
+    val currentBoard = remember(uiState.boardVersion) {
+        gameMatrix.getBoard().map { column -> column.toList() }
+    }
+
+    BoardGrid(pieces = currentBoard, selectedColumn = uiState.clickedColIndex, winningCells = uiState.gameStateDetails.winningCells) { newSelectedCol ->
+        if (uiState.gameStateDetails.gameState == GameState.IN_PROGRESS) {
+            viewModel.updateUiState(newSelectedColumn = newSelectedCol)
+        }
+    }
+    GameStatusMessage(gameStateDetails = uiState.gameStateDetails, currentPlayer = uiState.currentPlayer)
+
+    // Trigger the bot's logic only when the turn switches to RED and the game is active
+    LaunchedEffect(key1 = uiState.currentPlayer, key2 = uiState.gameStateDetails.gameState) {
+        if (uiState.currentPlayer == botPiece && uiState.gameStateDetails.gameState == GameState.IN_PROGRESS) {
+            playBotTurn(
+                gameMatrix = gameMatrix,
+                currentBoard = currentBoard,
+                botPiece = botPiece,
+                playerPiece = playerPiece,
+                scoreManager = scoreManager,
+                soundManager = soundManager,
+                viewModel = viewModel
+            )
+
+        }
+    }
+
+    val canPlayerPlay = uiState.clickedColIndex != null && currentBoard[uiState.clickedColIndex!!][0] == Piece.EMPTY
+            && uiState.gameStateDetails.gameState == GameState.IN_PROGRESS && uiState.currentPlayer == playerPiece
+
+    PlayTurnButton(currentPlayer = playerPiece, canPlay = canPlayerPlay) {
+        val col = uiState.clickedColIndex ?: return@PlayTurnButton
+        val landedRow = gameMatrix.dropPiece(col = col, piece = uiState.currentPlayer)
+
+
+        val newGameStateDetails = if (landedRow != null) {
+            val details: GameStateDetails = checkGameState(gameMatrix, uiState.currentPlayer,
+                landedRow, col)
+
+            if (details.gameState == GameState.ORANGE_WON) {
+                scope.launch { scoreManager.incrementWins(GameType.SINGLE_PLAYER, playerPiece) }
+            }
+            details
+        }
+        else {
+            uiState.gameStateDetails
+        }
+
+        val nextPlayer = if (newGameStateDetails.gameState == GameState.IN_PROGRESS) {
+            if (uiState.currentPlayer == botPiece) playerPiece else botPiece
+        }
+        else {
+            uiState.currentPlayer
+        }
+
+        soundManager.playSound(Sound.DROP_PIECE)
+        viewModel.updateUiState(newGameStateDetails = newGameStateDetails, nextPlayer = nextPlayer)
+
+    }
+
+
+    ResetGameButton { viewModel.resetGame(startingPlayer = playerPiece) }
 }
 @Composable
 fun TwoPlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenViewModel = viewModel(), scoreManager: ScoreManager) {
+
+
 
     val uiState by viewModel.uiState.collectAsState()
     val gameMatrix = viewModel.gameMatrix
@@ -75,7 +158,12 @@ fun TwoPlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenViewMod
     val redWins by scoreManager.getWinsFlow(GameType.TWO_PLAYER, Piece.RED).collectAsState(initial = 0)
     val orangeWins by scoreManager.getWinsFlow(GameType.TWO_PLAYER, Piece.ORANGE).collectAsState(initial = 0)
 
-    ScoreBoard(redWins = redWins, orangeWins = orangeWins)
+    ScoreBoard(
+        redWins = redWins,
+        orangeWins = orangeWins,
+        playerOneLabelId = R.string.red_player_wins_count,
+        playerTwoLabelId = R.string.orange_player_wins_count,
+    )
 
     val currentBoard = remember(uiState.boardVersion) {
         gameMatrix.getBoard().map { column -> column.toList() }
@@ -114,7 +202,8 @@ fun TwoPlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenViewMod
 
         val nextPlayer = if (newGameStateDetails.gameState == GameState.IN_PROGRESS) {
             if (uiState.currentPlayer == Piece.RED) Piece.ORANGE else Piece.RED
-        } else {
+        }
+        else {
             uiState.currentPlayer
         }
 
@@ -122,14 +211,54 @@ fun TwoPlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenViewMod
         viewModel.updateUiState(newGameStateDetails = newGameStateDetails, nextPlayer = nextPlayer)
     }
 
-    ResetGameButton { viewModel.resetGame() }
+    ResetGameButton { viewModel.resetGame(startingPlayer = listOf(Piece.RED, Piece.ORANGE).random()) }
+}
+
+suspend fun playBotTurn(
+    gameMatrix: GameMatrix,
+    currentBoard: List<List<Piece>>,
+    botPiece: Piece,
+    playerPiece: Piece,
+    scoreManager: ScoreManager,
+    soundManager: SoundManager,
+    viewModel: GameScreenViewModel
+) {
+    delay(600.milliseconds)
+
+    val availableColumns = currentBoard.indices.filter { colIndex ->
+        gameMatrix.getPiece(row = 0, col = colIndex) == Piece.EMPTY
+    }
+
+    val randomColIndex = availableColumns.randomOrNull()
+
+    if (randomColIndex != null) {
+
+        val landedRow = gameMatrix.dropPiece(col = randomColIndex, piece = botPiece)
+
+        val newGameStateDetails = if (landedRow != null) {
+            val details: GameStateDetails = checkGameState(gameMatrix, botPiece, landedRow, randomColIndex)
+            if (details.gameState == GameState.RED_WON) {
+                scoreManager.incrementWins(GameType.SINGLE_PLAYER, botPiece)
+            }
+            details
+        } else {
+            GameStateDetails()
+        }
+
+
+        val nextPlayer = if (newGameStateDetails.gameState == GameState.IN_PROGRESS) playerPiece else botPiece
+
+
+        soundManager.playSound(Sound.DROP_PIECE)
+        viewModel.updateUiState(newGameStateDetails = newGameStateDetails, nextPlayer = nextPlayer)
+    }
 }
 
 @Composable
-fun ScoreBoard(redWins: Int, orangeWins: Int) {
+fun ScoreBoard(redWins: Int, orangeWins: Int, playerOneLabelId: Int, playerTwoLabelId: Int) {
     Column {
-        Text(stringResource(R.string.red_player_wins_count, redWins), color = Color.Red)
-        Text(stringResource(R.string.orange_player_wins_count, orangeWins), color = colorResource(R.color.orange))
+        Text(stringResource(playerOneLabelId, redWins), color = Color.Red)
+        Text(stringResource(playerTwoLabelId, orangeWins), color = colorResource(R.color.orange))
     }
 }
 
