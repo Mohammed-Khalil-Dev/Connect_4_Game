@@ -94,7 +94,7 @@ fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenView
     )
     Spacer(modifier = Modifier.height(4.dp))
     Row(horizontalArrangement = Arrangement.Center) {
-        Text(text = stringResource(R.string.bot_difficulty), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(text = stringResource(R.string.bot_difficulty) + " ", color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(
             text = when (botDifficulty) {
                 BotDifficulty.EASY -> stringResource(R.string.easy)
