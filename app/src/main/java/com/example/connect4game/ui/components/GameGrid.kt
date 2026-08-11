@@ -17,7 +17,9 @@ import com.example.connect4game.model.game.types.Piece
 fun BoardGrid(pieces: List<List<Piece>>,
               selectedColumn: Int?,
               winningCells: List<Pair<Int, Int>>,
+              isColumnClickable: Boolean = true,
               onColumnClick: (Int) -> Unit
+
 ) {
     Row(Modifier.fillMaxWidth().background(Color(0xFF3A1C5E))) {
 
@@ -33,8 +35,7 @@ fun BoardGrid(pieces: List<List<Piece>>,
             Column(
                 modifier = Modifier
                     .weight(1f)
-
-                    .clickable {
+                    .clickable(enabled = isColumnClickable) {
                         onColumnClick(colIndex)
                     }
                     // Draw the slots first, then paint the highlight rectangle over them

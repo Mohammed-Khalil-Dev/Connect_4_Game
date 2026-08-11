@@ -43,8 +43,10 @@ import com.example.connect4game.model.settings.audio.SoundManager
 import com.example.connect4game.ui.components.BoardGrid
 import com.example.connect4game.ui.viewmodels.GameScreenViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.milliseconds
 
 
 @Composable
@@ -85,6 +87,8 @@ fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenView
     val playerWins by scoreManager.getWinsFlow(GameType.SINGLE_PLAYER, piece = playerPiece).collectAsState(initial = 0)
     val botWins by scoreManager.getWinsFlow(GameType.SINGLE_PLAYER, piece = botPiece).collectAsState(initial = 0)
     val botDifficulty: BotDifficulty by botDifficultyManager.botDifficultyFlow.collectAsState(initial = BotDifficulty.MEDIUM)
+    val isBotThinking = uiState.currentPlayer == botPiece &&
+            uiState.gameStateDetails.gameState == GameState.IN_PROGRESS
 
     ScoreBoard(
         redWins = botWins,
@@ -115,7 +119,9 @@ fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenView
     val currentBoard = remember(uiState.boardVersion) {
         gameMatrix.getBoard().map { column -> column.toList() }
     }
-    BoardGrid(pieces = currentBoard, selectedColumn = uiState.clickedColIndex, winningCells = uiState.gameStateDetails.winningCells) { newSelectedCol ->
+    BoardGrid(pieces = currentBoard, selectedColumn = if (isBotThinking) null else uiState.clickedColIndex
+        , winningCells = uiState.gameStateDetails.winningCells,
+        isColumnClickable = !isBotThinking) { newSelectedCol ->
         if (uiState.gameStateDetails.gameState == GameState.IN_PROGRESS) {
             viewModel.updateUiState(newSelectedColumn = newSelectedCol)
         }
@@ -180,8 +186,7 @@ fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenView
 
     }
 
-    val isBotThinking = uiState.currentPlayer == botPiece &&
-            uiState.gameStateDetails.gameState == GameState.IN_PROGRESS
+
     ResetGameButton(canReset = !isBotThinking) { viewModel.resetGame(startingPlayer = playerPiece) }
 }
 @Composable
@@ -270,7 +275,9 @@ suspend fun playBotTurn(
     if (availableColumns.isNotEmpty()) {
 
         val bestColIndex = withContext(Dispatchers.Default) {
-            findBestMove(currentBoard = gameMatrix, maxDepth = maxDepth)
+            val bestMoveIndex: Int = findBestMove(currentBoard = gameMatrix, maxDepth = maxDepth)
+            delay(duration = 150.milliseconds)
+            bestMoveIndex
         }
         val landedRow = gameMatrix.dropPiece(col = bestColIndex, piece = botPiece)
 
