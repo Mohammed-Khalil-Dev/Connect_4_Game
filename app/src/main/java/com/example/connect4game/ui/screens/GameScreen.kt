@@ -3,10 +3,14 @@ package com.example.connect4game.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults.buttonColors
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,7 +28,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.connect4game.R
+import com.example.connect4game.data.BotDifficultyManager
 import com.example.connect4game.data.ScoreManager
+import com.example.connect4game.model.game.core.BotDifficulty
 import com.example.connect4game.model.game.core.GameMatrix
 import com.example.connect4game.model.game.core.checkGameState
 import com.example.connect4game.model.game.core.findBestMove
@@ -51,22 +57,24 @@ fun GameScreen(
     val context = LocalContext.current
     val soundManager = remember { SoundManager(context) }
     val scoreManager = remember { ScoreManager(context) }
+    val botDifficultyManager = remember { BotDifficultyManager(context) }
 
 
 
     Column(modifier = Modifier
-        .padding(paddingValues)
+        .padding(paddingValues).padding(start = 10.dp, end = 10.dp)
         .fillMaxSize(), verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally) {
 
         when(gameType) {
-            GameType.SINGLE_PLAYER -> SinglePlayerGameScreen(soundManager = soundManager, viewModel = singlePlayerViewModel, scoreManager = scoreManager)
+            GameType.SINGLE_PLAYER -> SinglePlayerGameScreen(soundManager = soundManager, viewModel = singlePlayerViewModel,
+                scoreManager = scoreManager, botDifficultyManager = botDifficultyManager)
             GameType.TWO_PLAYER -> TwoPlayerGameScreen(soundManager = soundManager, viewModel = twoPlayerViewModel, scoreManager = scoreManager)
         }
     }
 }
 @Composable
-fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenViewModel = viewModel(), scoreManager: ScoreManager) {
+fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenViewModel = viewModel(), scoreManager: ScoreManager, botDifficultyManager: BotDifficultyManager) {
 
     val playerPiece: Piece = Piece.ORANGE
     val botPiece: Piece = Piece.RED
@@ -76,6 +84,7 @@ fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenView
     val scope = rememberCoroutineScope()
     val playerWins by scoreManager.getWinsFlow(GameType.SINGLE_PLAYER, piece = playerPiece).collectAsState(initial = 0)
     val botWins by scoreManager.getWinsFlow(GameType.SINGLE_PLAYER, piece = botPiece).collectAsState(initial = 0)
+    val botDifficulty: BotDifficulty by botDifficultyManager.botDifficultyFlow.collectAsState(initial = BotDifficulty.MEDIUM)
 
     ScoreBoard(
         redWins = botWins,
@@ -83,6 +92,22 @@ fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenView
         playerOneLabelId = R.string.bot_wins_count,
         playerTwoLabelId = R.string.you_wins_count
     )
+    Spacer(modifier = Modifier.height(4.dp))
+    Row(horizontalArrangement = Arrangement.Center) {
+        Text(text = stringResource(R.string.bot_difficulty), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            text = when (botDifficulty) {
+                BotDifficulty.EASY -> stringResource(R.string.easy)
+                BotDifficulty.MEDIUM -> stringResource(R.string.medium)
+                BotDifficulty.HARD -> stringResource(R.string.hard)
+            },
+            color = when (botDifficulty) {
+                BotDifficulty.EASY -> Color.Green.copy(alpha = 0.7f)
+                BotDifficulty.MEDIUM -> Color.Yellow.copy(alpha = 0.7f)
+                BotDifficulty.HARD -> Color.Red
+            }
+        )
+    }
 
 
 
@@ -90,7 +115,6 @@ fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenView
     val currentBoard = remember(uiState.boardVersion) {
         gameMatrix.getBoard().map { column -> column.toList() }
     }
-
     BoardGrid(pieces = currentBoard, selectedColumn = uiState.clickedColIndex, winningCells = uiState.gameStateDetails.winningCells) { newSelectedCol ->
         if (uiState.gameStateDetails.gameState == GameState.IN_PROGRESS) {
             viewModel.updateUiState(newSelectedColumn = newSelectedCol)
@@ -116,7 +140,8 @@ fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenView
                 playerPiece = playerPiece,
                 scoreManager = scoreManager,
                 soundManager = soundManager,
-                viewModel = viewModel
+                viewModel = viewModel,
+                maxDepth = botDifficulty.depth
             )
 
         }
@@ -155,8 +180,9 @@ fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenView
 
     }
 
-
-    ResetGameButton { viewModel.resetGame(startingPlayer = playerPiece) }
+    val isBotThinking = uiState.currentPlayer == botPiece &&
+            uiState.gameStateDetails.gameState == GameState.IN_PROGRESS
+    ResetGameButton(canReset = !isBotThinking) { viewModel.resetGame(startingPlayer = playerPiece) }
 }
 @Composable
 fun TwoPlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenViewModel = viewModel(), scoreManager: ScoreManager) {
@@ -234,7 +260,8 @@ suspend fun playBotTurn(
     playerPiece: Piece,
     scoreManager: ScoreManager,
     soundManager: SoundManager,
-    viewModel: GameScreenViewModel
+    viewModel: GameScreenViewModel,
+    maxDepth: Int
 ) {
 
 
@@ -243,7 +270,7 @@ suspend fun playBotTurn(
     if (availableColumns.isNotEmpty()) {
 
         val bestColIndex = withContext(Dispatchers.Default) {
-            findBestMove(gameMatrix)
+            findBestMove(currentBoard = gameMatrix, maxDepth = maxDepth)
         }
         val landedRow = gameMatrix.dropPiece(col = bestColIndex, piece = botPiece)
 
@@ -318,8 +345,8 @@ fun PlayTurnButton(
 }
 
 @Composable
-fun ResetGameButton(onReset: () -> Unit) {
-    Button(onClick = onReset) {
+fun ResetGameButton(canReset: Boolean = true, onReset: () -> Unit ) {
+    Button(onClick = onReset, enabled = canReset) {
         Text(stringResource(R.string.reset_game))
     }
 }

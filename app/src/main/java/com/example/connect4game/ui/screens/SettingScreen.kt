@@ -29,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -46,9 +45,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.os.LocaleListCompat
 import com.example.connect4game.R
+import com.example.connect4game.data.BotDifficultyManager
 import com.example.connect4game.data.ScoreManager
 import com.example.connect4game.model.game.core.BotDifficulty
-import com.example.connect4game.model.game.core.maxDepth
 import com.example.connect4game.model.game.types.GameType
 import com.example.connect4game.model.settings.audio.SoundManager
 import com.example.connect4game.model.settings.language.AppLanguage
@@ -62,7 +61,8 @@ fun SettingScreen(
     paddingValues: PaddingValues = PaddingValues(0.dp)) {
     val context = LocalContext.current
     val soundManager: SoundManager = remember { SoundManager(context = context) }
-    val scoreManager: ScoreManager = remember { ScoreManager(context) }
+    val scoreManager: ScoreManager = remember { ScoreManager(context = context) }
+    val botDifficultyManager: BotDifficultyManager = remember { BotDifficultyManager(context = context) }
     // Check the app current language
     val configuration = LocalConfiguration.current
     val currentLangTag = configuration.locales[0].language
@@ -71,7 +71,7 @@ fun SettingScreen(
     // observe volumeFlow. trigger on flow value change
     val currentVolume by soundManager.volumeFlow.collectAsState(initial = SoundManager.DEFAULT_SOUND_VOLUME)
     var gameTypeToReset by remember { mutableStateOf<GameType?>(null) }
-    var selectedDifficulty by remember { mutableIntStateOf(maxDepth) }
+    val selectedDifficulty: BotDifficulty by botDifficultyManager.botDifficultyFlow.collectAsState(initial = BotDifficulty.MEDIUM)
 
 
     var selectedLanguage by remember { mutableStateOf(initialLanguage) }
@@ -177,32 +177,35 @@ fun SettingScreen(
         ) {
             DifficultyRadioButton(
                 text = stringResource(R.string.easy),
-                selected = selectedDifficulty == BotDifficulty.EASY.depth,
+                selected = selectedDifficulty == BotDifficulty.EASY,
                 color = Color.Green.copy(alpha = 0.7f),
                 modifier = Modifier.weight(1f)
             ) {
-                selectedDifficulty = BotDifficulty.EASY.depth
-                maxDepth = BotDifficulty.EASY.depth
+                coroutineScope.launch {
+                    botDifficultyManager.saveBotDifficulty(BotDifficulty.EASY)
+                }
             }
 
             DifficultyRadioButton(
                 text = stringResource(R.string.medium),
-                selected = selectedDifficulty == BotDifficulty.MEDIUM.depth,
+                selected = selectedDifficulty == BotDifficulty.MEDIUM,
                 color = Color.Yellow.copy(alpha = 0.7f),
                 modifier = Modifier.weight(1f)
             ) {
-                selectedDifficulty = BotDifficulty.MEDIUM.depth
-                maxDepth = BotDifficulty.MEDIUM.depth
+                coroutineScope.launch {
+                    botDifficultyManager.saveBotDifficulty(BotDifficulty.MEDIUM)
+                }
             }
 
             DifficultyRadioButton(
                 text = stringResource(R.string.hard),
-                selected = selectedDifficulty == BotDifficulty.HARD.depth,
+                selected = selectedDifficulty == BotDifficulty.HARD,
                 color = Color.Red,
                 modifier = Modifier.weight(1f)
             ) {
-                selectedDifficulty = BotDifficulty.HARD.depth
-                maxDepth = BotDifficulty.HARD.depth
+                coroutineScope.launch {
+                    botDifficultyManager.saveBotDifficulty(BotDifficulty.HARD)
+                }
             }
         }
 

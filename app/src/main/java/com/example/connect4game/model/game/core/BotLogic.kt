@@ -3,26 +3,31 @@ package com.example.connect4game.model.game.core
 import android.util.Log
 import com.example.connect4game.model.game.state.GameState
 import com.example.connect4game.model.game.types.Piece
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 
 const val SCORE_WIN = 100_000
 const val SCORE_THREE_IN_A_ROW = 100
 const val SCORE_TWO_IN_A_ROW = 10
 const val SCORE_CENTER_COLUMN = 3
 const val PLAYER_SCORE_THREE_IN_A_ROW = 500
-var maxDepth = BotDifficulty.MEDIUM.depth
+
 
 val humanPiece = Piece.ORANGE
 val botPiece = Piece.RED
 
 
-fun miniMax(
+suspend fun miniMax(
     currentBoard: GameMatrix,
     depth: Int,
     alpha: Int,
     beta: Int,
     isMaximizingPlayer: Boolean
 ): Int {
-    val availableColumns: List<Int> = currentBoard.getAvailableColumnsIndex()
+    currentCoroutineContext().ensureActive()
+    // ideal order (Center first, edges last)
+    val preferredOrder = listOf(3, 4, 2, 5, 1, 6, 0)
+    val availableColumns: List<Int> = currentBoard.getAvailableColumnsIndex().sortedBy { preferredOrder.indexOf(it) }
     if (currentBoard.isBoardFull()) {
         return 0
     }
@@ -45,23 +50,27 @@ fun miniMax(
         for (col in availableColumns) {
 
             val row = currentBoard.dropPiece(col, botPiece)!!
-            val matchState = checkGameState(currentBoard, botPiece, row, col)
-            if (matchState.gameState == GameState.RED_WON) {
-                currentBoard.removePiece(row, col)
-                return SCORE_WIN
+            try {
+                val matchState = checkGameState(currentBoard, botPiece, row, col)
+                if (matchState.gameState == GameState.RED_WON) {
+                    return SCORE_WIN
+                }
+
+                // hand the board to the human to see how they respond
+                val score = miniMax(currentBoard, depth - 1, currentAlpha, currentBeta, false)
+                // after they respond
+
+
+                bestScore = maxOf(bestScore, score)
+                currentAlpha = maxOf(currentAlpha, bestScore)
+
+                if (currentAlpha >= currentBeta) {
+                    break // stop checking current branch.
+                }
             }
-
-            // hand the board to the human to see how they respond
-            val score = miniMax(currentBoard, depth - 1, currentAlpha, currentBeta, false)
-            // after they respond
-            // remove the Bot's test piece to reset the board
-            currentBoard.removePiece(row, col)
-
-            bestScore = maxOf(bestScore, score)
-            currentAlpha = maxOf(currentAlpha, bestScore)
-
-            if (currentAlpha >= currentBeta) {
-                break // stop checking current branch.
+            finally {
+                // remove the Bot's test piece to reset the board
+                currentBoard.removePiece(row, col)
             }
         }
         //final return from the fun
@@ -70,20 +79,23 @@ fun miniMax(
     else {
         for (col in availableColumns) {
             val row = currentBoard.dropPiece(col, humanPiece) ?: continue
-            val matchState = checkGameState(currentBoard, humanPiece, row, col)
-            if (matchState.gameState == GameState.ORANGE_WON) {
-                currentBoard.removePiece(row, col)
-                return -SCORE_WIN
+            try {
+                val matchState = checkGameState(currentBoard, humanPiece, row, col)
+                if (matchState.gameState == GameState.ORANGE_WON) {
+                    return -SCORE_WIN
+                }
+
+
+                val score = miniMax(currentBoard, depth - 1, currentAlpha, currentBeta, true)
+
+                bestScore = minOf(bestScore, score)
+                currentBeta = minOf(currentBeta, bestScore)
+
+                if (currentAlpha >= currentBeta) break
             }
-
-
-            val score = miniMax(currentBoard, depth - 1, currentAlpha, currentBeta, true)
-            currentBoard.removePiece(row, col)
-
-            bestScore = minOf(bestScore, score)
-            currentBeta = minOf(currentBeta, bestScore)
-
-            if (currentAlpha >= currentBeta) break
+            finally {
+                currentBoard.removePiece(row, col)
+            }
         }
         return bestScore
     }
@@ -91,27 +103,32 @@ fun miniMax(
 
 }
 
-fun findBestMove(currentBoard: GameMatrix): Int {
+suspend fun findBestMove(currentBoard: GameMatrix, maxDepth: Int): Int {
+    currentCoroutineContext().ensureActive()
     var bestScore = Int.MIN_VALUE
     var bestColumn = BoardConfig.NUMBER_OF_COLUMNS / 2
 
-    for (col in currentBoard.getAvailableColumnsIndex()) {
+    val preferredOrder = listOf(3, 4, 2, 5, 1, 6, 0)
+    val availableColumns = currentBoard.getAvailableColumnsIndex().sortedBy { preferredOrder.indexOf(it) }
+    for (col in availableColumns) {
         val row = currentBoard.dropPiece(col, botPiece) ?: continue
-        val matchState = checkGameState(currentBoard, botPiece, row, col)
-        if (matchState.gameState == GameState.RED_WON) {
-            currentBoard.removePiece(row, col)
-            Log.d("Bot", "Instant win found! Choosing column ${col + 1}")
-            return col
+        try {
+            val matchState = checkGameState(currentBoard, botPiece, row, col)
+            if (matchState.gameState == GameState.RED_WON) {
+                Log.d("Bot", "Instant win found! Choosing column ${col + 1}")
+                return col
+            }
+
+            val score = miniMax(currentBoard, depth = maxDepth, alpha = Int.MIN_VALUE, beta = Int.MAX_VALUE, isMaximizingPlayer = false)
+            Log.d("Bot", "result for column ${col + 1}: $score")
+
+            if (score > bestScore) {
+                bestScore = score
+                bestColumn = col
+            }
         }
-
-        val score = miniMax(currentBoard, depth = maxDepth, alpha = Int.MIN_VALUE, beta = Int.MAX_VALUE, isMaximizingPlayer = false)
-        Log.d("Bot", "result for column ${col + 1}: $score")
-
-        currentBoard.removePiece(row, col)
-
-        if (score > bestScore) {
-            bestScore = score
-            bestColumn = col
+        finally {
+            currentBoard.removePiece(row, col)
         }
     }
     Log.d("Bot", "best column this turn is ${bestColumn + 1} with score $bestScore")
