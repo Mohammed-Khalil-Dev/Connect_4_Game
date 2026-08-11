@@ -41,4 +41,8 @@
     <string name="bots_turn" >Bot\'s Turn</string>
     <string name="you_win" >You Win!</string>
     <string name="bot_wins" >Bot Wins!</string>
+    <string name="bot_difficulty">"Bot difficulty: "</string>
+    <string name="easy">Easy</string>
+    <string name="medium">Medium</string>
+    <string name="hard">Hard</string>
 </resources>

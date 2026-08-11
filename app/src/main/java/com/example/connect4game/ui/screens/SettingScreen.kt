@@ -2,6 +2,9 @@ package com.example.connect4game.ui.screens
 
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
@@ -18,12 +22,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -34,13 +40,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.os.LocaleListCompat
 import com.example.connect4game.R
-import com.example.connect4game.model.game.types.GameType
 import com.example.connect4game.data.ScoreManager
+import com.example.connect4game.model.game.core.BotDifficulty
+import com.example.connect4game.model.game.core.maxDepth
+import com.example.connect4game.model.game.types.GameType
 import com.example.connect4game.model.settings.audio.SoundManager
 import com.example.connect4game.model.settings.language.AppLanguage
 import com.example.connect4game.ui.theme.Connect4GameTheme
@@ -62,6 +71,7 @@ fun SettingScreen(
     // observe volumeFlow. trigger on flow value change
     val currentVolume by soundManager.volumeFlow.collectAsState(initial = SoundManager.DEFAULT_SOUND_VOLUME)
     var gameTypeToReset by remember { mutableStateOf<GameType?>(null) }
+    var selectedDifficulty by remember { mutableIntStateOf(maxDepth) }
 
 
     var selectedLanguage by remember { mutableStateOf(initialLanguage) }
@@ -142,13 +152,14 @@ fun SettingScreen(
         }
 
         gameTypeToReset?.let { type ->
+            val scoresResetMessage = stringResource(id = R.string.scores_reset)
             ResetAlertDialog(
                 gameType = type,
                 onConfirm = {
                     coroutineScope.launch {
                         scoreManager.resetWins(gameType = type)
                         Toast.makeText(context,
-                            context.getString(R.string.scores_reset), Toast.LENGTH_SHORT).show()
+                            scoresResetMessage, Toast.LENGTH_SHORT).show()
                     }
 
                 },
@@ -156,6 +167,43 @@ fun SettingScreen(
                     gameTypeToReset = null
                 }
             )
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(text = stringResource(R.string.bot_difficulty), fontSize = 20.sp, color = Color.White)
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            DifficultyRadioButton(
+                text = stringResource(R.string.easy),
+                selected = selectedDifficulty == BotDifficulty.EASY.depth,
+                color = Color.Green.copy(alpha = 0.7f),
+                modifier = Modifier.weight(1f)
+            ) {
+                selectedDifficulty = BotDifficulty.EASY.depth
+                maxDepth = BotDifficulty.EASY.depth
+            }
+
+            DifficultyRadioButton(
+                text = stringResource(R.string.medium),
+                selected = selectedDifficulty == BotDifficulty.MEDIUM.depth,
+                color = Color.Yellow.copy(alpha = 0.7f),
+                modifier = Modifier.weight(1f)
+            ) {
+                selectedDifficulty = BotDifficulty.MEDIUM.depth
+                maxDepth = BotDifficulty.MEDIUM.depth
+            }
+
+            DifficultyRadioButton(
+                text = stringResource(R.string.hard),
+                selected = selectedDifficulty == BotDifficulty.HARD.depth,
+                color = Color.Red,
+                modifier = Modifier.weight(1f)
+            ) {
+                selectedDifficulty = BotDifficulty.HARD.depth
+                maxDepth = BotDifficulty.HARD.depth
+            }
         }
 
 
@@ -177,7 +225,8 @@ fun LanguageRadioButton(
     onClick: () -> Unit
 ) {
     Row(
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clickable(onClick = onClick)
     ) {
         RadioButton(
             selected = selected,
@@ -187,6 +236,40 @@ fun LanguageRadioButton(
             text = text,
             modifier = Modifier.padding(start = 8.dp),
             color = Color.White
+        )
+    }
+}
+
+@Composable
+fun DifficultyRadioButton(
+    text: String,
+    selected: Boolean,
+    color: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .padding(horizontal = 4.dp)
+            .background(color = color, shape = RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick)
+            .padding(8.dp)
+    ) {
+        RadioButton(
+            selected = selected,
+            onClick = onClick,
+            colors = RadioButtonDefaults.colors(
+                selectedColor = Color.White,
+                unselectedColor = Color.White.copy(alpha = 0.6f)
+            )
+        )
+        Text(
+            text = text,
+            color = Color.White,
+            fontSize = 12.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }

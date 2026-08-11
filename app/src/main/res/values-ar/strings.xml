@@ -40,5 +40,9 @@
     <string name="bots_turn">دور الحاسوب</string>
     <string name="you_win">لقد فزت!</string>
     <string name="bot_wins">فاز الحاسوب!</string>
+    <string name="bot_difficulty">مستوى صعوبة الحاسوب:</string>
+    <string name="easy">سهل</string>
+    <string name="medium">متوسط</string>
+    <string name="hard">صعب</string>
 
 </resources>
