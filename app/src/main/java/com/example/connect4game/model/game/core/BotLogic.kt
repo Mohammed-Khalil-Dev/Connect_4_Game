@@ -49,11 +49,12 @@ suspend fun miniMax(
         // test dropping in all columns
         for (col in availableColumns) {
 
-            val row = currentBoard.dropPiece(col, botPiece)!!
+            val row = currentBoard.dropPiece(col, botPiece) ?: continue
             try {
                 val matchState = checkGameState(currentBoard, botPiece, row, col)
                 if (matchState.gameState == GameState.RED_WON) {
-                    return SCORE_WIN
+                    // Add depth so a faster win (higher depth number) is worth more
+                    return SCORE_WIN + depth
                 }
 
                 // hand the board to the human to see how they respond
@@ -82,7 +83,8 @@ suspend fun miniMax(
             try {
                 val matchState = checkGameState(currentBoard, humanPiece, row, col)
                 if (matchState.gameState == GameState.ORANGE_WON) {
-                    return -SCORE_WIN
+                    // Subtract depth so a faster loss is penalized more heavily
+                    return -(SCORE_WIN + depth)
                 }
 
 

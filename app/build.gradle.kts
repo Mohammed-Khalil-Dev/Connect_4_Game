@@ -10,6 +10,9 @@ android {
     compileSdk {
         version = release(37)
     }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 
     defaultConfig {
         applicationId = "com.example.connect4game"

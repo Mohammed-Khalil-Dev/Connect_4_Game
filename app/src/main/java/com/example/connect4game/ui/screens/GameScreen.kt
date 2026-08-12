@@ -276,7 +276,7 @@ suspend fun playBotTurn(
 
         val bestColIndex = withContext(Dispatchers.Default) {
             val bestMoveIndex: Int = findBestMove(currentBoard = gameMatrix, maxDepth = maxDepth)
-            delay(duration = 150.milliseconds)
+            delay(duration = 250.milliseconds)
             bestMoveIndex
         }
         val landedRow = gameMatrix.dropPiece(col = bestColIndex, piece = botPiece)
