@@ -186,7 +186,7 @@ fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenView
 
     }
 
-
+    Spacer(modifier = Modifier.height(40.dp))
     ResetGameButton(canReset = !isBotThinking) { viewModel.resetGame(startingPlayer = playerPiece) }
 }
 @Composable
@@ -255,7 +255,7 @@ fun TwoPlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenViewMod
         soundManager.playSound(Sound.DROP_PIECE)
         viewModel.updateUiState(newGameStateDetails = newGameStateDetails, nextPlayer = nextPlayer)
     }
-
+    Spacer(modifier = Modifier.height(40.dp))
     ResetGameButton { viewModel.resetGame(startingPlayer = listOf(Piece.RED, Piece.ORANGE).random()) }
 }
 

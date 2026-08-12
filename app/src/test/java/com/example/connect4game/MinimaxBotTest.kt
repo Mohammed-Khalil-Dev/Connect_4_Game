@@ -24,7 +24,8 @@ class MinimaxBotTest {
         board.dropPiece(col = 1, piece = Piece.RED)
         board.dropPiece(col = 2, piece = Piece.RED)
 
-        val selectedColumn = findBestMove(currentBoard = board, maxDepth = BotDifficulty.HARD.depth)
+        val selectedColumn = findBestMove(currentBoard = board, botDifficulty = BotDifficulty.EASY,
+            isTest = true)
 
         assertEquals( 3, selectedColumn)
     }
@@ -36,7 +37,8 @@ class MinimaxBotTest {
         board.dropPiece(col = 0, piece = Piece.RED)
         board.dropPiece(col = 0, piece = Piece.RED)
 
-        val selectedColumn = findBestMove(currentBoard = board, maxDepth = BotDifficulty.HARD.depth)
+        val selectedColumn = findBestMove(currentBoard = board, botDifficulty = BotDifficulty.HARD,
+            isTest = true)
 
         assertEquals( 0, selectedColumn)
 
@@ -49,7 +51,8 @@ class MinimaxBotTest {
         board.dropPiece(col = 1, piece = Piece.ORANGE)
         board.dropPiece(col = 2, piece = Piece.ORANGE)
 
-        val selectedColumn = findBestMove(currentBoard = board, maxDepth = BotDifficulty.HARD.depth)
+        val selectedColumn = findBestMove(currentBoard = board, botDifficulty = BotDifficulty.HARD,
+            isTest = true)
 
         assertEquals( 3, selectedColumn)
 
@@ -63,7 +66,8 @@ class MinimaxBotTest {
         board.dropPiece(col = 0, piece = Piece.ORANGE)
         board.dropPiece(col = 0, piece = Piece.ORANGE)
 
-        val selectedColumn = findBestMove(currentBoard = board, maxDepth = BotDifficulty.HARD.depth)
+        val selectedColumn = findBestMove(currentBoard = board, botDifficulty = BotDifficulty.HARD,
+            isTest = true)
 
         assertEquals( 0, selectedColumn)
 
@@ -80,7 +84,8 @@ class MinimaxBotTest {
         board.dropPiece(col = 0, piece = Piece.ORANGE)
         board.dropPiece(col = 0, piece = Piece.ORANGE)
 
-        val selectedColumn = findBestMove(currentBoard = board, maxDepth = BotDifficulty.HARD.depth)
+        val selectedColumn = findBestMove(currentBoard = board, botDifficulty = BotDifficulty.HARD,
+            isTest = true)
 
         assertEquals( 1, selectedColumn)
     }
@@ -95,7 +100,8 @@ class MinimaxBotTest {
         board.dropPiece(col = 4, piece = Piece.RED)
 
 
-        val selectedColumn = findBestMove(currentBoard = board, maxDepth = BotDifficulty.HARD.depth)
+        val selectedColumn = findBestMove(currentBoard = board, botDifficulty = BotDifficulty.HARD,
+            isTest = true)
 
         assertTrue(selectedColumn == 2 || selectedColumn == 5)
     }
@@ -111,7 +117,8 @@ class MinimaxBotTest {
         board.dropPiece(col = 4, piece = Piece.RED)
 
 
-        val selectedColumn = findBestMove(currentBoard = board, maxDepth = BotDifficulty.MEDIUM.depth)
+        val selectedColumn = findBestMove(currentBoard = board, botDifficulty = BotDifficulty.MEDIUM,
+            isTest = true)
 
         assertTrue(selectedColumn == 2 || selectedColumn == 5)
     }
@@ -127,7 +134,8 @@ class MinimaxBotTest {
         board.dropPiece(col = 4, piece = Piece.RED)
 
 
-        val selectedColumn = findBestMove(currentBoard = board, maxDepth = BotDifficulty.EASY.depth)
+        val selectedColumn = findBestMove(currentBoard = board, botDifficulty = BotDifficulty.EASY,
+            isTest = true)
 
         assertTrue(selectedColumn == 2 || selectedColumn == 5)
     }

@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
 
         // set time until update
         val configSettings = remoteConfigSettings {
-            minimumFetchIntervalInSeconds = 0
+            minimumFetchIntervalInSeconds = 3600
         }
         remoteConfig.setConfigSettingsAsync(configSettings)
 

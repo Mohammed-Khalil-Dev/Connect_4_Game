@@ -4,6 +4,8 @@ import android.util.Log
 import com.example.connect4game.data.BotDifficultyManager
 import com.example.connect4game.model.game.state.GameState
 import com.example.connect4game.model.game.types.Piece
+import com.google.firebase.Firebase
+import com.google.firebase.perf.performance
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 
@@ -34,7 +36,7 @@ suspend fun miniMax(
     }
 
     // Depth limit reached: get the total score for this branch(from the leaf node)
-    if (depth == 0) {
+    if (depth <= 0) {
         return evaluateBoard(gameMatrix = currentBoard)
     }
 
@@ -106,40 +108,52 @@ suspend fun miniMax(
 
 }
 
-suspend fun findBestMove(currentBoard: GameMatrix, botDifficulty: BotDifficulty): Int {
+suspend fun findBestMove(currentBoard: GameMatrix, botDifficulty: BotDifficulty, isTest: Boolean = false): Int {
     currentCoroutineContext().ensureActive()
 
-    val activeDepth = BotDifficultyManager.getDepthForDifficulty(botDifficulty = botDifficulty)
-
-
-    var bestScore = Int.MIN_VALUE
-    var bestColumn = BoardConfig.NUMBER_OF_COLUMNS / 2
-
-    val preferredOrder = listOf(3, 4, 2, 5, 1, 6, 0)
-    val availableColumns = currentBoard.getAvailableColumnsIndex().sortedBy { preferredOrder.indexOf(it) }
-    for (col in availableColumns) {
-        val row = currentBoard.dropPiece(col, botPiece) ?: continue
-        try {
-            val matchState = checkGameState(currentBoard, botPiece, row, col)
-            if (matchState.gameState == GameState.RED_WON) {
-                Log.d("Bot", "Instant win found! Choosing column ${col + 1}")
-                return col
-            }
-
-            val score = miniMax(currentBoard, depth = activeDepth, alpha = Int.MIN_VALUE, beta = Int.MAX_VALUE, isMaximizingPlayer = false)
-            Log.d("Bot", "result for column ${col + 1}: $score")
-
-            if (score > bestScore) {
-                bestScore = score
-                bestColumn = col
-            }
-        }
-        finally {
-            currentBoard.removePiece(row, col)
-        }
+    var botTrace: com.google.firebase.perf.metrics.Trace? = null
+    if (!isTest) {
+        botTrace = Firebase.performance.newTrace("bot_thinking_time")
+        botTrace.putAttribute("bot_difficulty", botDifficulty.name)
+        botTrace.start()
     }
-    Log.d("Bot", "best column this turn is ${bestColumn + 1} with score $bestScore")
-    return bestColumn
+
+    val activeDepth = if (!isTest)  BotDifficultyManager.getDepthForDifficulty(botDifficulty = botDifficulty)
+    else botDifficulty.depth
+
+    try {
+        var bestScore = Int.MIN_VALUE
+        var bestColumn = BoardConfig.NUMBER_OF_COLUMNS / 2
+
+        val preferredOrder = listOf(3, 4, 2, 5, 1, 6, 0)
+        val availableColumns = currentBoard.getAvailableColumnsIndex().sortedBy { preferredOrder.indexOf(it) }
+        for (col in availableColumns) {
+            val row = currentBoard.dropPiece(col, botPiece) ?: continue
+            try {
+                val matchState = checkGameState(currentBoard, botPiece, row, col)
+                if (matchState.gameState == GameState.RED_WON) {
+                    Log.d("Bot", "Instant win found! Choosing column ${col + 1}")
+                    return col
+                }
+
+                val score = miniMax(currentBoard, depth = activeDepth, alpha = Int.MIN_VALUE, beta = Int.MAX_VALUE, isMaximizingPlayer = false)
+                Log.d("Bot", "result for column ${col + 1}: $score")
+
+                if (score > bestScore) {
+                    bestScore = score
+                    bestColumn = col
+                }
+            }
+            finally {
+                currentBoard.removePiece(row, col)
+            }
+        }
+        Log.d("Bot", "best column this turn is ${bestColumn + 1} with score $bestScore")
+        return bestColumn
+    }
+    finally {
+        botTrace?.stop()
+    }
 }
 
 fun evaluateBoard(gameMatrix: GameMatrix): Int {
