@@ -147,7 +147,7 @@ fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenView
                 scoreManager = scoreManager,
                 soundManager = soundManager,
                 viewModel = viewModel,
-                maxDepth = botDifficulty.depth
+                botDifficulty = botDifficulty
             )
 
         }
@@ -266,7 +266,7 @@ suspend fun playBotTurn(
     scoreManager: ScoreManager,
     soundManager: SoundManager,
     viewModel: GameScreenViewModel,
-    maxDepth: Int
+    botDifficulty: BotDifficulty
 ) {
 
 
@@ -275,7 +275,7 @@ suspend fun playBotTurn(
     if (availableColumns.isNotEmpty()) {
 
         val bestColIndex = withContext(Dispatchers.Default) {
-            val bestMoveIndex: Int = findBestMove(currentBoard = gameMatrix, maxDepth = maxDepth)
+            val bestMoveIndex: Int = findBestMove(currentBoard = gameMatrix, botDifficulty = botDifficulty)
             delay(duration = 250.milliseconds)
             bestMoveIndex
         }

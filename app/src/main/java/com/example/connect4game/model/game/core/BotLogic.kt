@@ -1,6 +1,7 @@
 package com.example.connect4game.model.game.core
 
 import android.util.Log
+import com.example.connect4game.data.BotDifficultyManager
 import com.example.connect4game.model.game.state.GameState
 import com.example.connect4game.model.game.types.Piece
 import kotlinx.coroutines.currentCoroutineContext
@@ -105,8 +106,12 @@ suspend fun miniMax(
 
 }
 
-suspend fun findBestMove(currentBoard: GameMatrix, maxDepth: Int): Int {
+suspend fun findBestMove(currentBoard: GameMatrix, botDifficulty: BotDifficulty): Int {
     currentCoroutineContext().ensureActive()
+
+    val activeDepth = BotDifficultyManager.getDepthForDifficulty(botDifficulty = botDifficulty)
+
+
     var bestScore = Int.MIN_VALUE
     var bestColumn = BoardConfig.NUMBER_OF_COLUMNS / 2
 
@@ -121,7 +126,7 @@ suspend fun findBestMove(currentBoard: GameMatrix, maxDepth: Int): Int {
                 return col
             }
 
-            val score = miniMax(currentBoard, depth = maxDepth, alpha = Int.MIN_VALUE, beta = Int.MAX_VALUE, isMaximizingPlayer = false)
+            val score = miniMax(currentBoard, depth = activeDepth, alpha = Int.MIN_VALUE, beta = Int.MAX_VALUE, isMaximizingPlayer = false)
             Log.d("Bot", "result for column ${col + 1}: $score")
 
             if (score > bestScore) {
