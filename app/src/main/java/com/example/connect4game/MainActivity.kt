@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import com.example.connect4game.model.game.core.BotDifficulty
-import com.example.connect4game.ui.Connect4Navigation
+import com.example.connect4game.ui.Connect4Game
 import com.example.connect4game.ui.theme.Connect4GameTheme
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.analytics
@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         }
         setContent {
             Connect4GameTheme {
-                Connect4Navigation()
+                Connect4Game()
             }
         }
     }

@@ -48,4 +48,6 @@
     <string name="bot_piece_color">"Bot Piece Color: "</string>
     <string name="red">Red</string>
     <string name="orange">Orange</string>
+    <string name="change_bot_piece_color">Change bot piece color?</string>
+    <string name="change_bot_piece_color_text">Changing bot piece color will reset the current singleplayer game</string>
 </resources>

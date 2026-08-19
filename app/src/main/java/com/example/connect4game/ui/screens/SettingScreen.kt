@@ -78,7 +78,9 @@ fun SettingScreen(
     val currentVolume by soundManager.volumeFlow.collectAsState(initial = SoundManager.DEFAULT_SOUND_VOLUME)
     var gameTypeToReset by remember { mutableStateOf<GameType?>(null) }
     val selectedDifficulty: BotDifficulty by botDifficultyManager.botDifficultyFlow.collectAsState(initial = BotDifficulty.MEDIUM)
-    val botPieceColor: Piece by botPieceColorManager.botPieceColorFlow.collectAsState(initial = Piece.RED)
+    val botPieceColor: Piece by botPieceColorManager.botPieceColorFlow.collectAsState(initial = Piece.valueOf(
+        BotPieceColorManager.DEFAULT_BOT_PIECE_COLOR))
+    var pendingBotPiece by remember { mutableStateOf<Piece?>(null) }
 
 
     var selectedLanguage by remember { mutableStateOf(initialLanguage) }
@@ -226,19 +228,29 @@ fun SettingScreen(
                 textColor = Color.Red,
                 selected = botPieceColor == Piece.RED)
             {
-                coroutineScope.launch {
-                    botPieceColorManager.saveBotPieceColor(piece = Piece.RED)
-                }
+                pendingBotPiece = Piece.RED
             }
 
             BotPieceColorRadioButton(text = stringResource(R.string.orange),
                 textColor = colorResource(R.color.orange),
                 selected = botPieceColor == Piece.ORANGE)
             {
-                coroutineScope.launch {
-                    botPieceColorManager.saveBotPieceColor(piece = Piece.ORANGE)
-                }
+                pendingBotPiece = Piece.ORANGE
             }
+        }
+
+        pendingBotPiece?.let { targetPiece ->
+            ChangeBotPieceColorAlertDialog(
+                onConfirm = {
+                    coroutineScope.launch {
+                        botPieceColorManager.saveBotPieceColor(piece = targetPiece)
+                    }
+                    pendingBotPiece = null
+                },
+                onDismiss = {
+                    pendingBotPiece = null
+                }
+            )
         }
 
 
@@ -351,6 +363,31 @@ fun ResetAlertDialog(
             R.string.delete_wins_message,
             gameTypeToReset
         )) },
+        confirmButton = {
+            Button(onClick = {
+                onConfirm()
+                onDismiss()
+            }) {
+                Text(stringResource(R.string.confirm))
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
+fun ChangeBotPieceColorAlertDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(R.string.change_bot_piece_color)) },
+        text = { Text(text = stringResource(R.string.change_bot_piece_color_text)) },
         confirmButton = {
             Button(onClick = {
                 onConfirm()

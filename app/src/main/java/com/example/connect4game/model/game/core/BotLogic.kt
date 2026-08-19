@@ -2,7 +2,6 @@ package com.example.connect4game.model.game.core
 
 import android.util.Log
 import com.example.connect4game.data.BotDifficultyManager
-import com.example.connect4game.data.BotPieceColorManager
 import com.example.connect4game.model.game.state.GameState
 import com.example.connect4game.model.game.types.Piece
 import com.google.firebase.Firebase
@@ -10,29 +9,20 @@ import com.google.firebase.perf.performance
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 
-const val SCORE_WIN = 100_000
+const val SCORE_WIN = Int.MAX_VALUE - 100_000_000
 const val SCORE_THREE_IN_A_ROW = 100
 const val SCORE_TWO_IN_A_ROW = 10
 const val SCORE_CENTER_COLUMN = 3
 const val PLAYER_SCORE_THREE_IN_A_ROW = 500
-
-
-var currentBotPiece: Piece = Piece.valueOf(BotPieceColorManager.DEFAULT_BOT_PIECE_COLOR)
-var currentHumanPiece = if (currentBotPiece == Piece.RED) Piece.ORANGE else Piece.RED
-
-
-val botWinState: GameState
-    get() = if (currentBotPiece == Piece.RED) GameState.RED_WON else GameState.ORANGE_WON
-
-val humanWinState: GameState
-    get() = if (currentHumanPiece == Piece.RED) GameState.RED_WON else GameState.ORANGE_WON
 
 suspend fun miniMax(
     currentBoard: GameMatrix,
     depth: Int,
     alpha: Int,
     beta: Int,
-    isMaximizingPlayer: Boolean
+    isMaximizingPlayer: Boolean,
+    botPiece: Piece,
+    playerPiece: Piece
 ): Int {
     currentCoroutineContext().ensureActive()
     // ideal order (Center first, edges last)
@@ -44,8 +34,11 @@ suspend fun miniMax(
 
     // Depth limit reached: get the total score for this branch(from the leaf node)
     if (depth <= 0) {
-        return evaluateBoard(gameMatrix = currentBoard)
+        return evaluateBoard(gameMatrix = currentBoard, botPiece = botPiece, playerPiece = playerPiece)
     }
+
+    val botWinState = if (botPiece == Piece.RED) GameState.RED_WON else GameState.ORANGE_WON
+    val humanWinState = if (playerPiece == Piece.RED) GameState.RED_WON else GameState.ORANGE_WON
 
     // Alpha: the best score for the bot in this branch so far
     var currentAlpha = alpha
@@ -59,16 +52,16 @@ suspend fun miniMax(
         // test dropping in all columns
         for (col in availableColumns) {
 
-            val row = currentBoard.dropPiece(col, piece = currentBotPiece) ?: continue
+            val row = currentBoard.dropPiece(col, piece = botPiece) ?: continue
             try {
-                val matchState = checkGameState(currentBoard, currentPiece = currentBotPiece, row, col)
+                val matchState = checkGameState(currentBoard, currentPiece = botPiece, row, col)
                 if (matchState.gameState == botWinState) {
                     // Add depth so a faster win (higher depth number) is worth more
                     return SCORE_WIN + depth
                 }
 
                 // hand the board to the human to see how they respond
-                val score = miniMax(currentBoard, depth - 1, currentAlpha, currentBeta, false)
+                val score = miniMax(currentBoard, depth - 1, currentAlpha, currentBeta, false, botPiece, playerPiece)
                 // after they respond
 
 
@@ -89,16 +82,16 @@ suspend fun miniMax(
     }
     else {
         for (col in availableColumns) {
-            val row = currentBoard.dropPiece(col, currentHumanPiece) ?: continue
+            val row = currentBoard.dropPiece(col, playerPiece) ?: continue
             try {
-                val matchState = checkGameState(currentBoard, currentHumanPiece, row, col)
+                val matchState = checkGameState(currentBoard, playerPiece, row, col)
                 if (matchState.gameState == humanWinState) {
                     // Subtract depth so a faster loss is penalized more heavily
                     return -(SCORE_WIN + depth)
                 }
 
 
-                val score = miniMax(currentBoard, depth - 1, currentAlpha, currentBeta, true)
+                val score = miniMax(currentBoard, depth - 1, currentAlpha, currentBeta, true, botPiece, playerPiece)
 
                 bestScore = minOf(bestScore, score)
                 currentBeta = minOf(currentBeta, bestScore)
@@ -119,8 +112,8 @@ suspend fun findBestMove(currentBoard: GameMatrix, botDifficulty: BotDifficulty,
                          botPiece: Piece): Int {
     currentCoroutineContext().ensureActive()
 
-    currentBotPiece = botPiece
-    currentHumanPiece = if (currentBotPiece == Piece.RED) Piece.ORANGE else Piece.RED
+    val playerPiece = if (botPiece == Piece.RED) Piece.ORANGE else Piece.RED
+    val botWinState = if (botPiece == Piece.RED) GameState.RED_WON else GameState.ORANGE_WON
 
     var botTrace: com.google.firebase.perf.metrics.Trace? = null
     if (!isTest) {
@@ -148,7 +141,15 @@ suspend fun findBestMove(currentBoard: GameMatrix, botDifficulty: BotDifficulty,
                     return col
                 }
 
-                val score = miniMax(currentBoard, depth = activeDepth, alpha = Int.MIN_VALUE, beta = Int.MAX_VALUE, isMaximizingPlayer = false)
+                val score = miniMax(
+                    currentBoard,
+                    depth = activeDepth,
+                    alpha = Int.MIN_VALUE,
+                    beta = Int.MAX_VALUE,
+                    isMaximizingPlayer = false,
+                    botPiece = botPiece,
+                    playerPiece = playerPiece
+                )
                 Log.d("Bot", "result for column ${col + 1}: $score")
 
                 if (score > bestScore) {
@@ -168,7 +169,7 @@ suspend fun findBestMove(currentBoard: GameMatrix, botDifficulty: BotDifficulty,
     }
 }
 
-fun evaluateBoard(gameMatrix: GameMatrix): Int {
+fun evaluateBoard(gameMatrix: GameMatrix, botPiece: Piece, playerPiece: Piece): Int {
     var totalScore = 0
 
 
@@ -177,22 +178,22 @@ fun evaluateBoard(gameMatrix: GameMatrix): Int {
 
             val rightWindow = getWindow(gameMatrix, startRow = row, startCol = col, Direction.RIGHT)
             if (rightWindow.isNotEmpty()) {
-                totalScore += scoreWindow(rightWindow)
+                totalScore += scoreWindow(rightWindow, botPiece, playerPiece)
             }
 
             val downWindow = getWindow(gameMatrix, startRow = row, startCol = col, Direction.DOWN)
             if (downWindow.isNotEmpty()) {
-                totalScore += scoreWindow(downWindow)
+                totalScore += scoreWindow(downWindow, botPiece, playerPiece)
             }
 
             val downRightWindow = getWindow(gameMatrix, startRow = row, startCol = col, Direction.DOWN_RIGHT)
             if (downRightWindow.isNotEmpty()) {
-                totalScore += scoreWindow(downRightWindow)
+                totalScore += scoreWindow(downRightWindow, botPiece, playerPiece)
             }
 
             val downLeftWindow = getWindow(gameMatrix, startRow = row, startCol = col, Direction.DOWN_LEFT)
             if (downLeftWindow.isNotEmpty()) {
-                totalScore += scoreWindow(downLeftWindow)
+                totalScore += scoreWindow(downLeftWindow, botPiece, playerPiece)
             }
         }
     }
@@ -202,7 +203,7 @@ fun evaluateBoard(gameMatrix: GameMatrix): Int {
 
 
     for (row in 0 until BoardConfig.NUMBER_OF_ROWS) {
-        if (gameMatrix.getPiece(row, centerColumnIndex) == currentBotPiece) {
+        if (gameMatrix.getPiece(row, centerColumnIndex) == botPiece) {
             centerPiecesCount++
         }
     }
@@ -212,12 +213,12 @@ fun evaluateBoard(gameMatrix: GameMatrix): Int {
     return totalScore
 }
 
-fun scoreWindow(window: List<Piece>): Int {
+fun scoreWindow(window: List<Piece>, botPiece: Piece, playerPiece: Piece): Int {
     var score = 0
 
 
-    val botCount = window.count { it == currentBotPiece }
-    val humanCount = window.count { it == currentHumanPiece }
+    val botCount = window.count { it == botPiece }
+    val humanCount = window.count { it == playerPiece }
     val emptyCount = window.count { it == Piece.EMPTY }
 
     when (botCount) {

@@ -31,14 +31,14 @@ class GameScreenViewModel : ViewModel() {
         }
     }
 
-    fun resetGame(startingPlayer: Piece = Piece.ORANGE) {
+    fun resetGame(startingPlayer: Piece) {
         gameMatrix.clearBoard()
 
         _uiState.update { currentState ->
             currentState.copy(
                 gameStateDetails = GameStateDetails(),
                 currentPlayer = startingPlayer,
-                boardVersion = 0,
+                boardVersion = currentState.boardVersion + 1,
                 clickedColIndex = null
             )
         }

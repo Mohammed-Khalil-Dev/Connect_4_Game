@@ -13,7 +13,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.connect4game.ui.viewmodels.GameScreenViewModel
 import com.example.connect4game.model.game.types.GameType
 import com.example.connect4game.ui.components.CustomTopBar
 import com.example.connect4game.ui.screens.GameScreen
@@ -25,6 +24,7 @@ import com.example.connect4game.ui.theme.DeepPlum
 import com.example.connect4game.ui.theme.MidnightPurple
 import com.example.connect4game.ui.theme.NightMagenta
 import com.example.connect4game.ui.theme.TwilightBlue
+import com.example.connect4game.ui.viewmodels.GameScreenViewModel
 
 val twilightGradientBrush = Brush.linearGradient(
     colors = listOf(
@@ -36,7 +36,7 @@ val twilightGradientBrush = Brush.linearGradient(
     )
 )
 @Composable
-fun Connect4Navigation() {
+fun Connect4Game() {
     val navController = rememberNavController()
     // update the UI on Navigation stack change
     val navBackStackEntry by navController.currentBackStackEntryAsState()

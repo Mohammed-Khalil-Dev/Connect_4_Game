@@ -19,7 +19,7 @@ class BotDifficultyManager(private val context: Context) {
 
     companion object {
         val BOT_DIFFICULTY_KEY: Preferences.Key<Int> = intPreferencesKey("bot_difficulty")
-        val DEFAULT_BOT_DIFFICULTY: Int = BotDifficulty.MEDIUM.depth
+        val DEFAULT_BOT_DIFFICULTY: BotDifficulty = BotDifficulty.MEDIUM
 
         fun getDepthForDifficulty(botDifficulty: BotDifficulty): Int {
             val remoteConfig = Firebase.remoteConfig
@@ -44,7 +44,7 @@ class BotDifficultyManager(private val context: Context) {
     }
 
     val botDifficultyFlow: Flow<BotDifficulty> = context.difficultyDataStore.data.map { pref ->
-        val savedDepth = pref[BOT_DIFFICULTY_KEY] ?: DEFAULT_BOT_DIFFICULTY
+        val savedDepth: Int = pref[BOT_DIFFICULTY_KEY] ?: DEFAULT_BOT_DIFFICULTY.depth
         BotDifficulty.entries.find { it.depth == savedDepth } ?: BotDifficulty.MEDIUM
     }
 

@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.connect4game.R
 import com.example.connect4game.data.BotDifficultyManager
+import com.example.connect4game.data.BotPieceColorManager
 import com.example.connect4game.data.ScoreManager
 import com.example.connect4game.model.game.core.BotDifficulty
 import com.example.connect4game.model.game.core.GameMatrix
@@ -78,23 +79,32 @@ fun GameScreen(
 @Composable
 fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenViewModel = viewModel(), scoreManager: ScoreManager, botDifficultyManager: BotDifficultyManager) {
 
-    val playerPiece: Piece = Piece.ORANGE
-    val botPiece: Piece = Piece.RED
+    val context = LocalContext.current
+    val botPieceColorManager: BotPieceColorManager = remember { BotPieceColorManager(context = context) }
+    val botPiece: Piece by botPieceColorManager.botPieceColorFlow.collectAsState(initial = Piece.valueOf(
+        BotPieceColorManager.DEFAULT_BOT_PIECE_COLOR))
+
+    val playerPiece: Piece = if (botPiece == Piece.RED) Piece.ORANGE else Piece.RED
+
 
     val uiState by viewModel.uiState.collectAsState()
     val gameMatrix = viewModel.gameMatrix
     val scope = rememberCoroutineScope()
     val playerWins by scoreManager.getWinsFlow(GameType.SINGLE_PLAYER, piece = playerPiece).collectAsState(initial = 0)
     val botWins by scoreManager.getWinsFlow(GameType.SINGLE_PLAYER, piece = botPiece).collectAsState(initial = 0)
-    val botDifficulty: BotDifficulty by botDifficultyManager.botDifficultyFlow.collectAsState(initial = BotDifficulty.MEDIUM)
+    val botDifficulty: BotDifficulty by botDifficultyManager.botDifficultyFlow.collectAsState(initial = BotDifficultyManager.DEFAULT_BOT_DIFFICULTY)
     val isBotThinking = uiState.currentPlayer == botPiece &&
             uiState.gameStateDetails.gameState == GameState.IN_PROGRESS
 
+    LaunchedEffect(key1 = playerPiece) {
+        viewModel.resetGame(startingPlayer = playerPiece)
+    }
+
     ScoreBoard(
-        redWins = botWins,
-        orangeWins = playerWins,
-        playerOneLabelId = R.string.bot_wins_count,
-        playerTwoLabelId = R.string.you_wins_count
+        redWins = if (botPiece == Piece.RED) botWins else playerWins,
+        orangeWins = if (botPiece == Piece.ORANGE) botWins else playerWins,
+        playerOneLabelId = if (botPiece == Piece.RED) R.string.bot_wins_count else R.string.you_wins_count,
+        playerTwoLabelId = if (botPiece == Piece.ORANGE) R.string.bot_wins_count else R.string.you_wins_count
     )
     Spacer(modifier = Modifier.height(4.dp))
     Row(horizontalArrangement = Arrangement.Center) {
@@ -116,7 +126,7 @@ fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenView
 
 
 
-    val currentBoard = remember(uiState.boardVersion) {
+    val currentBoard = remember(key1 = uiState.boardVersion) {
         gameMatrix.getBoard().map { column -> column.toList() }
     }
     BoardGrid(pieces = currentBoard, selectedColumn = if (isBotThinking) null else uiState.clickedColIndex
@@ -130,15 +140,15 @@ fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenView
     GameStatusMessage(
         gameStateDetails = uiState.gameStateDetails,
         currentPlayer = uiState.currentPlayer,
-        orangePlayerTurnId = R.string.your_turn,
-        redPlayerTurnId = R.string.bots_turn,
-        orangePlayerWonId = R.string.you_win,
-        redPlayerWonId = R.string.bot_wins
+        orangePlayerTurnId = if (playerPiece == Piece.ORANGE) R.string.your_turn else R.string.bots_turn,
+        redPlayerTurnId = if (playerPiece == Piece.RED) R.string.your_turn else R.string.bots_turn,
+        orangePlayerWonId = if (playerPiece == Piece.ORANGE) R.string.you_win else R.string.bot_wins,
+        redPlayerWonId = if (playerPiece == Piece.RED) R.string.you_win else R.string.bot_wins
     )
 
 
-    // Trigger the bot's logic only when the turn switches to RED and the game is active
-    LaunchedEffect(key1 = uiState.currentPlayer, key2 = uiState.gameStateDetails.gameState) {
+    // Trigger the bot's logic only when the turn switches and the game is active
+    LaunchedEffect(key1 = uiState.currentPlayer, key2 = uiState.gameStateDetails.gameState, key3 = botPiece) {
         if (uiState.currentPlayer == botPiece && uiState.gameStateDetails.gameState == GameState.IN_PROGRESS) {
             playBotTurn(
                 gameMatrix = gameMatrix,
@@ -165,7 +175,8 @@ fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenView
             val details: GameStateDetails = checkGameState(gameMatrix, uiState.currentPlayer,
                 landedRow, col)
 
-            if (details.gameState == GameState.ORANGE_WON) {
+            val humanWinState = if (playerPiece == Piece.RED) GameState.RED_WON else GameState.ORANGE_WON
+            if (details.gameState == humanWinState) {
                 scope.launch { scoreManager.incrementWins(GameType.SINGLE_PLAYER, playerPiece) }
             }
             details
@@ -275,7 +286,8 @@ suspend fun playBotTurn(
     if (availableColumns.isNotEmpty()) {
 
         val bestColIndex = withContext(Dispatchers.Default) {
-            val bestMoveIndex: Int = findBestMove(currentBoard = gameMatrix, botDifficulty = botDifficulty)
+            val bestMoveIndex: Int = findBestMove(currentBoard = gameMatrix, botDifficulty = botDifficulty,
+                botPiece = botPiece)
             delay(duration = 250.milliseconds)
             bestMoveIndex
         }
@@ -283,7 +295,8 @@ suspend fun playBotTurn(
 
         val newGameStateDetails = if (landedRow != null) {
             val details: GameStateDetails = checkGameState(gameMatrix, botPiece, landedRow, bestColIndex)
-            if (details.gameState == GameState.RED_WON) {
+            val botWinState = if (botPiece == Piece.RED) GameState.RED_WON else GameState.ORANGE_WON
+            if (details.gameState == botWinState) {
                 scoreManager.incrementWins(GameType.SINGLE_PLAYER, botPiece)
             }
             details

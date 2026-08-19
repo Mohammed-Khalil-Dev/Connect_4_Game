@@ -47,5 +47,7 @@
     <string name="bot_piece_color">لون قطعة الحاسوب:</string>
     <string name="red">أحمر</string>
     <string name="orange">برتقالي</string>
+    <string name="change_bot_piece_color">تغيير لون قطعة الحاسوب؟</string>
+    <string name="change_bot_piece_color_text">سيؤدي تغيير لون قطعة الحاسوب إلى إعادة تعيين اللعب الفردي الحالية</string>
 
 </resources>
