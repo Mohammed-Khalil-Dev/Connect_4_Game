@@ -48,6 +48,16 @@ class GameMatrix {
         grid[col][row] = Piece.EMPTY
     }
 
+    fun copy(): GameMatrix {
+        val newMatrix = GameMatrix()
+        for (col in grid.indices) {
+            for (row in grid[col].indices) {
+                newMatrix.grid[col][row] = this.grid[col][row]
+            }
+        }
+        return newMatrix
+    }
+
     fun getBoard(): List<List<Piece>> {
         return grid
     }

@@ -34,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,21 +70,25 @@ fun SettingScreen(
     val scoreManager: ScoreManager = remember { ScoreManager(context = context) }
     val botDifficultyManager: BotDifficultyManager = remember { BotDifficultyManager(context = context) }
     val botPieceColorManager: BotPieceColorManager = remember { BotPieceColorManager(context = context) }
+    
     // Check the app current language
     val configuration = LocalConfiguration.current
     val currentLangTag = configuration.locales[0].language
     val initialLanguage = if (currentLangTag == "ar") AppLanguage.ARABIC else AppLanguage.ENGLISH
     val coroutineScope = rememberCoroutineScope()
+    
     // observe volumeFlow. trigger on flow value change
     val currentVolume by soundManager.volumeFlow.collectAsState(initial = SoundManager.DEFAULT_SOUND_VOLUME)
-    var gameTypeToReset by remember { mutableStateOf<GameType?>(null) }
+    // rememberSaveable survives configuration changes (like screen rotation),
+    // unlike regular remember. Used here to prevent alert popups from dismissing if the phone tilts.
+    var gameTypeToReset by rememberSaveable { mutableStateOf<GameType?>(null) }
     val selectedDifficulty: BotDifficulty by botDifficultyManager.botDifficultyFlow.collectAsState(initial = BotDifficulty.MEDIUM)
     val botPieceColor: Piece by botPieceColorManager.botPieceColorFlow.collectAsState(initial = Piece.valueOf(
         BotPieceColorManager.DEFAULT_BOT_PIECE_COLOR))
-    var pendingBotPiece by remember { mutableStateOf<Piece?>(null) }
-
+    var pendingBotPiece by rememberSaveable { mutableStateOf<Piece?>(null) }
 
     var selectedLanguage by remember { mutableStateOf(initialLanguage) }
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -174,7 +179,6 @@ fun SettingScreen(
                         Toast.makeText(context,
                             scoresResetMessage, Toast.LENGTH_SHORT).show()
                     }
-
                 },
                 onDismiss = {
                     gameTypeToReset = null
@@ -259,17 +263,7 @@ fun SettingScreen(
                 }
             )
         }
-
-
-
-
-
-        
-
-
     }
-
-
 }
 
 @Composable

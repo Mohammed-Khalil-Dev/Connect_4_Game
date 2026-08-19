@@ -5,6 +5,7 @@ import com.example.connect4game.data.BotDifficultyManager
 import com.example.connect4game.model.game.state.GameState
 import com.example.connect4game.model.game.types.Piece
 import com.google.firebase.Firebase
+import com.google.firebase.perf.metrics.Trace
 import com.google.firebase.perf.performance
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -112,10 +113,12 @@ suspend fun findBestMove(currentBoard: GameMatrix, botDifficulty: BotDifficulty,
                          botPiece: Piece): Int {
     currentCoroutineContext().ensureActive()
 
+    val simulationBoard: GameMatrix = currentBoard.copy()
+
     val playerPiece = if (botPiece == Piece.RED) Piece.ORANGE else Piece.RED
     val botWinState = if (botPiece == Piece.RED) GameState.RED_WON else GameState.ORANGE_WON
 
-    var botTrace: com.google.firebase.perf.metrics.Trace? = null
+    var botTrace: Trace? = null
     if (!isTest) {
         botTrace = Firebase.performance.newTrace("bot_thinking_time")
         botTrace.putAttribute("bot_difficulty", botDifficulty.name)
@@ -130,11 +133,11 @@ suspend fun findBestMove(currentBoard: GameMatrix, botDifficulty: BotDifficulty,
         var bestColumn = BoardConfig.NUMBER_OF_COLUMNS / 2
 
         val preferredOrder = listOf(3, 4, 2, 5, 1, 6, 0)
-        val availableColumns = currentBoard.getAvailableColumnsIndex().sortedBy { preferredOrder.indexOf(it) }
+        val availableColumns = simulationBoard.getAvailableColumnsIndex().sortedBy { preferredOrder.indexOf(it) }
         for (col in availableColumns) {
-            val row = currentBoard.dropPiece(col, botPiece) ?: continue
+            val row = simulationBoard.dropPiece(col, botPiece) ?: continue
             try {
-                val matchState = checkGameState(currentBoard, botPiece, row, col)
+                val matchState = checkGameState(currentBoard = simulationBoard, botPiece, row, col)
 
                 if (matchState.gameState == botWinState) {
                     Log.d("Bot", "Instant win found! Choosing column ${col + 1}")
@@ -142,7 +145,7 @@ suspend fun findBestMove(currentBoard: GameMatrix, botDifficulty: BotDifficulty,
                 }
 
                 val score = miniMax(
-                    currentBoard,
+                    currentBoard = simulationBoard,
                     depth = activeDepth,
                     alpha = Int.MIN_VALUE,
                     beta = Int.MAX_VALUE,
@@ -158,7 +161,7 @@ suspend fun findBestMove(currentBoard: GameMatrix, botDifficulty: BotDifficulty,
                 }
             }
             finally {
-                currentBoard.removePiece(row, col)
+                simulationBoard.removePiece(row, col)
             }
         }
         Log.d("Bot", "best column this turn is ${bestColumn + 1} with score $bestScore")

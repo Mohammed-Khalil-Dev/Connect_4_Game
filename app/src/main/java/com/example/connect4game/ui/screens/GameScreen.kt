@@ -77,7 +77,8 @@ fun GameScreen(
     }
 }
 @Composable
-fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenViewModel = viewModel(), scoreManager: ScoreManager, botDifficultyManager: BotDifficultyManager) {
+fun SinglePlayerGameScreen(soundManager: SoundManager, viewModel: GameScreenViewModel = viewModel(),
+                           scoreManager: ScoreManager, botDifficultyManager: BotDifficultyManager) {
 
     val context = LocalContext.current
     val botPieceColorManager: BotPieceColorManager = remember { BotPieceColorManager(context = context) }
