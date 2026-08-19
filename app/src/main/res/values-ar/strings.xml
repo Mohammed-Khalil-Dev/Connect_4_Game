@@ -44,5 +44,8 @@
     <string name="easy">سهل</string>
     <string name="medium">متوسط</string>
     <string name="hard">صعب</string>
+    <string name="bot_piece_color">لون قطعة الحاسوب:</string>
+    <string name="red">أحمر</string>
+    <string name="orange">برتقالي</string>
 
 </resources>

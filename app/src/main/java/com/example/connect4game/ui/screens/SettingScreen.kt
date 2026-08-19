@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
@@ -38,16 +40,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.os.LocaleListCompat
 import com.example.connect4game.R
 import com.example.connect4game.data.BotDifficultyManager
+import com.example.connect4game.data.BotPieceColorManager
 import com.example.connect4game.data.ScoreManager
 import com.example.connect4game.model.game.core.BotDifficulty
 import com.example.connect4game.model.game.types.GameType
+import com.example.connect4game.model.game.types.Piece
 import com.example.connect4game.model.settings.audio.SoundManager
 import com.example.connect4game.model.settings.language.AppLanguage
 import com.example.connect4game.ui.theme.Connect4GameTheme
@@ -62,6 +68,7 @@ fun SettingScreen(
     val soundManager: SoundManager = remember { SoundManager(context = context) }
     val scoreManager: ScoreManager = remember { ScoreManager(context = context) }
     val botDifficultyManager: BotDifficultyManager = remember { BotDifficultyManager(context = context) }
+    val botPieceColorManager: BotPieceColorManager = remember { BotPieceColorManager(context = context) }
     // Check the app current language
     val configuration = LocalConfiguration.current
     val currentLangTag = configuration.locales[0].language
@@ -71,6 +78,7 @@ fun SettingScreen(
     val currentVolume by soundManager.volumeFlow.collectAsState(initial = SoundManager.DEFAULT_SOUND_VOLUME)
     var gameTypeToReset by remember { mutableStateOf<GameType?>(null) }
     val selectedDifficulty: BotDifficulty by botDifficultyManager.botDifficultyFlow.collectAsState(initial = BotDifficulty.MEDIUM)
+    val botPieceColor: Piece by botPieceColorManager.botPieceColorFlow.collectAsState(initial = Piece.RED)
 
 
     var selectedLanguage by remember { mutableStateOf(initialLanguage) }
@@ -78,12 +86,13 @@ fun SettingScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
-            .padding(start = 16.dp, end = 16.dp),
+            .padding(start = 16.dp, end = 16.dp)
+            .verticalScroll(state = rememberScrollState()),
         horizontalAlignment = Alignment.Start
     ) {
-        Spacer(modifier = Modifier.height(40.dp))
-        Text(stringResource(R.string.language), fontSize = 20.sp, color = Color.White)
-
+        Spacer(modifier = Modifier.height(30.dp))
+        Text(stringResource(R.string.language), fontSize = 20.sp, color = Color.White, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(10.dp))
         LanguageRadioButton(
             text = stringResource(R.string.english),
             selected = (selectedLanguage == AppLanguage.ENGLISH),
@@ -93,6 +102,7 @@ fun SettingScreen(
                 AppCompatDelegate.setApplicationLocales(appLocale)
             }
         )
+        Spacer(modifier = Modifier.height(10.dp))
         LanguageRadioButton(
             text = stringResource(R.string.arabic_word),
             selected = (selectedLanguage == AppLanguage.ARABIC),
@@ -101,9 +111,9 @@ fun SettingScreen(
                 val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags(AppLanguage.ARABIC.tag)
                 AppCompatDelegate.setApplicationLocales(appLocale)
             })
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(stringResource(R.string.sound), fontSize = 20.sp, color = Color.White)
-
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(stringResource(R.string.sound), fontSize = 20.sp, color = Color.White, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(10.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -136,8 +146,8 @@ fun SettingScreen(
                 tint = Color.White
             )
         }
-        Spacer(modifier = Modifier.height(40.dp))
-        Text(text = stringResource(R.string.game_data), fontSize = 20.sp, color = Color.White)
+        Spacer(modifier = Modifier.height(30.dp))
+        Text(text = stringResource(R.string.game_data), fontSize = 20.sp, color = Color.White, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(10.dp))
         Column(horizontalAlignment = Alignment.Start) {
             ResetWinsButton(text = stringResource(R.string.reset_single_player_wins)) {
@@ -167,8 +177,8 @@ fun SettingScreen(
                 }
             )
         }
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(text = stringResource(R.string.bot_difficulty), fontSize = 20.sp, color = Color.White)
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(text = stringResource(R.string.bot_difficulty), fontSize = 20.sp, color = Color.White, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(10.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -207,6 +217,29 @@ fun SettingScreen(
                 }
             }
         }
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(text = stringResource(R.string.bot_piece_color), fontSize = 20.sp, color = Color.White, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween) {
+            BotPieceColorRadioButton(text = stringResource(R.string.red),
+                textColor = Color.Red,
+                selected = botPieceColor == Piece.RED)
+            {
+                coroutineScope.launch {
+                    botPieceColorManager.saveBotPieceColor(piece = Piece.RED)
+                }
+            }
+
+            BotPieceColorRadioButton(text = stringResource(R.string.orange),
+                textColor = colorResource(R.color.orange),
+                selected = botPieceColor == Piece.ORANGE)
+            {
+                coroutineScope.launch {
+                    botPieceColorManager.saveBotPieceColor(piece = Piece.ORANGE)
+                }
+            }
+        }
 
 
 
@@ -232,12 +265,30 @@ fun LanguageRadioButton(
     ) {
         RadioButton(
             selected = selected,
-            onClick = onClick
+            onClick = null
         )
         Text(
             text = text,
             modifier = Modifier.padding(start = 8.dp),
             color = Color.White
+        )
+    }
+}
+
+@Composable
+fun BotPieceColorRadioButton(
+    text: String,
+    textColor: Color,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(modifier = Modifier.clickable(onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically) {
+        RadioButton(selected = selected, onClick = null)
+        Text(
+            text = text,
+            modifier = Modifier.padding(start = 8.dp),
+            color = textColor
         )
     }
 }
@@ -260,7 +311,7 @@ fun DifficultyRadioButton(
     ) {
         RadioButton(
             selected = selected,
-            onClick = onClick,
+            onClick = null,
             colors = RadioButtonDefaults.colors(
                 selectedColor = Color.White,
                 unselectedColor = Color.White.copy(alpha = 0.6f)

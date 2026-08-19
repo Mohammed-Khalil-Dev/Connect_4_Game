@@ -2,6 +2,7 @@ package com.example.connect4game.model.game.core
 
 import android.util.Log
 import com.example.connect4game.data.BotDifficultyManager
+import com.example.connect4game.data.BotPieceColorManager
 import com.example.connect4game.model.game.state.GameState
 import com.example.connect4game.model.game.types.Piece
 import com.google.firebase.Firebase
@@ -16,9 +17,15 @@ const val SCORE_CENTER_COLUMN = 3
 const val PLAYER_SCORE_THREE_IN_A_ROW = 500
 
 
-val humanPiece = Piece.ORANGE
-val botPiece = Piece.RED
+var currentBotPiece: Piece = Piece.valueOf(BotPieceColorManager.DEFAULT_BOT_PIECE_COLOR)
+var currentHumanPiece = if (currentBotPiece == Piece.RED) Piece.ORANGE else Piece.RED
 
+
+val botWinState: GameState
+    get() = if (currentBotPiece == Piece.RED) GameState.RED_WON else GameState.ORANGE_WON
+
+val humanWinState: GameState
+    get() = if (currentHumanPiece == Piece.RED) GameState.RED_WON else GameState.ORANGE_WON
 
 suspend fun miniMax(
     currentBoard: GameMatrix,
@@ -52,10 +59,10 @@ suspend fun miniMax(
         // test dropping in all columns
         for (col in availableColumns) {
 
-            val row = currentBoard.dropPiece(col, botPiece) ?: continue
+            val row = currentBoard.dropPiece(col, piece = currentBotPiece) ?: continue
             try {
-                val matchState = checkGameState(currentBoard, botPiece, row, col)
-                if (matchState.gameState == GameState.RED_WON) {
+                val matchState = checkGameState(currentBoard, currentPiece = currentBotPiece, row, col)
+                if (matchState.gameState == botWinState) {
                     // Add depth so a faster win (higher depth number) is worth more
                     return SCORE_WIN + depth
                 }
@@ -82,10 +89,10 @@ suspend fun miniMax(
     }
     else {
         for (col in availableColumns) {
-            val row = currentBoard.dropPiece(col, humanPiece) ?: continue
+            val row = currentBoard.dropPiece(col, currentHumanPiece) ?: continue
             try {
-                val matchState = checkGameState(currentBoard, humanPiece, row, col)
-                if (matchState.gameState == GameState.ORANGE_WON) {
+                val matchState = checkGameState(currentBoard, currentHumanPiece, row, col)
+                if (matchState.gameState == humanWinState) {
                     // Subtract depth so a faster loss is penalized more heavily
                     return -(SCORE_WIN + depth)
                 }
@@ -108,8 +115,12 @@ suspend fun miniMax(
 
 }
 
-suspend fun findBestMove(currentBoard: GameMatrix, botDifficulty: BotDifficulty, isTest: Boolean = false): Int {
+suspend fun findBestMove(currentBoard: GameMatrix, botDifficulty: BotDifficulty, isTest: Boolean = false,
+                         botPiece: Piece): Int {
     currentCoroutineContext().ensureActive()
+
+    currentBotPiece = botPiece
+    currentHumanPiece = if (currentBotPiece == Piece.RED) Piece.ORANGE else Piece.RED
 
     var botTrace: com.google.firebase.perf.metrics.Trace? = null
     if (!isTest) {
@@ -131,7 +142,8 @@ suspend fun findBestMove(currentBoard: GameMatrix, botDifficulty: BotDifficulty,
             val row = currentBoard.dropPiece(col, botPiece) ?: continue
             try {
                 val matchState = checkGameState(currentBoard, botPiece, row, col)
-                if (matchState.gameState == GameState.RED_WON) {
+
+                if (matchState.gameState == botWinState) {
                     Log.d("Bot", "Instant win found! Choosing column ${col + 1}")
                     return col
                 }
@@ -190,7 +202,7 @@ fun evaluateBoard(gameMatrix: GameMatrix): Int {
 
 
     for (row in 0 until BoardConfig.NUMBER_OF_ROWS) {
-        if (gameMatrix.getPiece(row, centerColumnIndex) == botPiece) {
+        if (gameMatrix.getPiece(row, centerColumnIndex) == currentBotPiece) {
             centerPiecesCount++
         }
     }
@@ -204,8 +216,8 @@ fun scoreWindow(window: List<Piece>): Int {
     var score = 0
 
 
-    val botCount = window.count { it == botPiece }
-    val humanCount = window.count { it == humanPiece }
+    val botCount = window.count { it == currentBotPiece }
+    val humanCount = window.count { it == currentHumanPiece }
     val emptyCount = window.count { it == Piece.EMPTY }
 
     when (botCount) {
