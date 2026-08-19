@@ -99,6 +99,7 @@ fun SettingScreen(
             text = stringResource(R.string.english),
             selected = (selectedLanguage == AppLanguage.ENGLISH),
             onClick = {
+                if (selectedLanguage == AppLanguage.ENGLISH) return@LanguageRadioButton
                 selectedLanguage = AppLanguage.ENGLISH
                 val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags(AppLanguage.ENGLISH.tag)
                 AppCompatDelegate.setApplicationLocales(appLocale)
@@ -109,6 +110,7 @@ fun SettingScreen(
             text = stringResource(R.string.arabic_word),
             selected = (selectedLanguage == AppLanguage.ARABIC),
             onClick = {
+                if (selectedLanguage == AppLanguage.ARABIC) return@LanguageRadioButton
                 selectedLanguage = AppLanguage.ARABIC
                 val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags(AppLanguage.ARABIC.tag)
                 AppCompatDelegate.setApplicationLocales(appLocale)
@@ -192,6 +194,7 @@ fun SettingScreen(
                 color = Color.Green.copy(alpha = 0.7f),
                 modifier = Modifier.weight(1f)
             ) {
+                if (selectedDifficulty == BotDifficulty.EASY) return@DifficultyRadioButton
                 coroutineScope.launch {
                     botDifficultyManager.saveBotDifficulty(BotDifficulty.EASY)
                 }
@@ -203,6 +206,7 @@ fun SettingScreen(
                 color = Color.Yellow.copy(alpha = 0.7f),
                 modifier = Modifier.weight(1f)
             ) {
+                if (selectedDifficulty == BotDifficulty.MEDIUM) return@DifficultyRadioButton
                 coroutineScope.launch {
                     botDifficultyManager.saveBotDifficulty(BotDifficulty.MEDIUM)
                 }
@@ -214,6 +218,7 @@ fun SettingScreen(
                 color = Color.Red,
                 modifier = Modifier.weight(1f)
             ) {
+                if (selectedDifficulty == BotDifficulty.HARD) return@DifficultyRadioButton
                 coroutineScope.launch {
                     botDifficultyManager.saveBotDifficulty(BotDifficulty.HARD)
                 }
@@ -228,6 +233,7 @@ fun SettingScreen(
                 textColor = Color.Red,
                 selected = botPieceColor == Piece.RED)
             {
+                if (botPieceColor == Piece.RED) return@BotPieceColorRadioButton
                 pendingBotPiece = Piece.RED
             }
 
@@ -235,6 +241,7 @@ fun SettingScreen(
                 textColor = colorResource(R.color.orange),
                 selected = botPieceColor == Piece.ORANGE)
             {
+                if (botPieceColor == Piece.ORANGE) return@BotPieceColorRadioButton
                 pendingBotPiece = Piece.ORANGE
             }
         }
