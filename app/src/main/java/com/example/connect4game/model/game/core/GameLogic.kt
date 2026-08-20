@@ -1,13 +1,13 @@
 package com.example.connect4game.model.game.core
 
 import com.example.connect4game.model.game.state.GameState
-import com.example.connect4game.model.game.state.GameStateDetails
+import com.example.connect4game.model.game.state.BoardEvaluationResult
 import com.example.connect4game.model.game.types.Piece
 
 const val CONNECTED_PIECES_TO_WIN = 4
 
 
-fun checkGameState(currentBoard: GameMatrix, currentPiece: Piece, currentRow: Int, currentCol: Int): GameStateDetails {
+fun checkGameState(currentBoard: GameMatrix, currentPiece: Piece, currentRow: Int, currentCol: Int): BoardEvaluationResult {
     val upCells = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, direction = Direction.UP)
     val downCells = getCellsInDirection(currentBoard, currentPiece, currentRow, currentCol, direction = Direction.DOWN)
     val verticalCells = upCells + downCells + Pair(currentRow, currentCol)
@@ -27,25 +27,25 @@ fun checkGameState(currentBoard: GameMatrix, currentPiece: Piece, currentRow: In
     val winningState = if (currentPiece == Piece.RED) GameState.RED_WON else GameState.ORANGE_WON
 
     if (verticalCells.size >= CONNECTED_PIECES_TO_WIN) {
-        return GameStateDetails(winningState, verticalCells)
+        return BoardEvaluationResult(winningState, verticalCells)
     }
     if (horizontalCells.size >= CONNECTED_PIECES_TO_WIN) {
-        return GameStateDetails(winningState, horizontalCells)
+        return BoardEvaluationResult(winningState, horizontalCells)
     }
     if (diagonal1Cells.size >= CONNECTED_PIECES_TO_WIN) {
-        return GameStateDetails(winningState, diagonal1Cells)
+        return BoardEvaluationResult(winningState, diagonal1Cells)
     }
     if (diagonal2Cells.size >= CONNECTED_PIECES_TO_WIN) {
-        return GameStateDetails(winningState, diagonal2Cells)
+        return BoardEvaluationResult(winningState, diagonal2Cells)
     }
 
 
 
     if (currentBoard.isBoardFull()) {
-        return GameStateDetails(GameState.DRAW, emptyList())
+        return BoardEvaluationResult(GameState.DRAW, emptyList())
     }
 
-    return GameStateDetails(GameState.IN_PROGRESS, emptyList())
+    return BoardEvaluationResult(GameState.IN_PROGRESS, emptyList())
 }
 
 /**
