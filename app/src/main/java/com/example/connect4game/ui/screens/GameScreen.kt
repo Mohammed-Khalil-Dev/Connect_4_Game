@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -58,13 +57,14 @@ fun SinglePlayerGameScreen(
     viewModel: GameScreenViewModel) {
 
     val uiState by viewModel.uiState.collectAsState()
+
     val botPiece: Piece = uiState.botPieceColor
     val playerPiece: Piece = if (botPiece == Piece.RED) Piece.ORANGE else Piece.RED
-
-    val gameMatrix = viewModel.gameMatrix
+    val currentBoard: List<List<Piece>> = uiState.board
     val playerWins = if (playerPiece == Piece.RED) uiState.redWins else uiState.orangeWins
     val botWins = if (botPiece == Piece.RED) uiState.redWins else uiState.orangeWins
     val currentBotDifficulty: BotDifficulty = uiState.currentBotDifficulty
+
     val isBotThinking = uiState.currentPlayer == botPiece &&
             uiState.boardEvaluationResult.gameState == GameState.IN_PROGRESS
 
@@ -96,11 +96,6 @@ fun SinglePlayerGameScreen(
     }
 
 
-
-
-    val currentBoard = remember(key1 = uiState.boardVersion) {
-        gameMatrix.getBoard().map { column -> column.toList() }
-    }
     BoardGrid(pieces = currentBoard, selectedColumn = if (isBotThinking) null else uiState.clickedColIndex
         , winningCells = uiState.boardEvaluationResult.winningCells,
         isColumnClickable = !isBotThinking) { newSelectedCol ->
@@ -135,7 +130,8 @@ fun SinglePlayerGameScreen(
 fun TwoPlayerGameScreen(viewModel: GameScreenViewModel) {
 
     val uiState by viewModel.uiState.collectAsState()
-    val gameMatrix = viewModel.gameMatrix
+
+    val currentBoard: List<List<Piece>> = uiState.board
     val redWins = uiState.redWins
     val orangeWins = uiState.orangeWins
 
@@ -146,9 +142,6 @@ fun TwoPlayerGameScreen(viewModel: GameScreenViewModel) {
         playerTwoLabelId = R.string.orange_player_wins_count,
     )
 
-    val currentBoard = remember(uiState.boardVersion) {
-        gameMatrix.getBoard().map { column -> column.toList() }
-    }
 
     BoardGrid(pieces = currentBoard, selectedColumn = uiState.clickedColIndex, winningCells = uiState.boardEvaluationResult.winningCells) { newSelectedCol ->
         if (uiState.boardEvaluationResult.gameState == GameState.IN_PROGRESS) {

@@ -33,7 +33,7 @@ class GameScreenViewModel(
     private val botPieceColorManager: BotPieceColorManager
 ) : ViewModel() {
 
-    val gameMatrix = GameMatrix()
+    private val gameMatrix = GameMatrix()
     private val _uiState = MutableStateFlow(GameUiState())
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
 
@@ -83,7 +83,7 @@ class GameScreenViewModel(
             currentState.copy(
                 boardEvaluationResult = newBoardEvaluationResult ?: currentState.boardEvaluationResult,
                 currentPlayer = nextPlayer ?: currentState.currentPlayer,
-                boardVersion = currentState.boardVersion + 1,
+                board = gameMatrix.getBoard().map { column -> column.toList() },
                 clickedColIndex = newSelectedColumn
             )
         }
@@ -96,7 +96,7 @@ class GameScreenViewModel(
             currentState.copy(
                 boardEvaluationResult = BoardEvaluationResult(),
                 currentPlayer = startingPlayer,
-                boardVersion = currentState.boardVersion + 1,
+                board = gameMatrix.getBoard().map { column -> column.toList() },
                 clickedColIndex = null
             )
         }
