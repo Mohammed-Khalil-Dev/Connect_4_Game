@@ -9,7 +9,6 @@ import android.os.Bundle
 import com.example.connect4game.util.PermissionHelper
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.analytics
-import java.net.ServerSocket
 
 class WiFiDirectManager(private val context: Context) {
     private val manager: WifiP2pManager = context.getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager
@@ -23,9 +22,9 @@ class WiFiDirectManager(private val context: Context) {
 
         if (!PermissionHelper.isRequiredWifiP2pPermissionsGranted(context)) return
 
-        val randomOpenPort: Int = ServerSocket(0).localPort
+
         val extraData = mapOf(
-            "game_port" to randomOpenPort.toString(),
+            "game_port" to "9999",
         )
 
 
