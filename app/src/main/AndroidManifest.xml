@@ -43,10 +43,8 @@
             </intent-filter>
         </activity>
 
-        <receiver
-            android:name=".network.WiFiDirectBroadcastReceiver"
-            android:enabled="true"
-            android:exported="true"></receiver>
+
+
     </application>
 
 </manifest>
