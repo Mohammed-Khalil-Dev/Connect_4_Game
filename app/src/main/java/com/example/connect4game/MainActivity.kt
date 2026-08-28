@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import com.example.connect4game.model.game.core.BotDifficulty
+import com.example.connect4game.network.WiFiDirectManager
 import com.example.connect4game.ui.Connect4Game
 import com.example.connect4game.ui.theme.Connect4GameTheme
 import com.google.firebase.Firebase
@@ -14,13 +15,14 @@ import com.google.firebase.remoteconfig.remoteConfigSettings
 
 
 class MainActivity : AppCompatActivity() {
+    private val wifiDirectManager by lazy { WiFiDirectManager(this) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
             initializeRemoteConfig()
         }
         catch (e: Exception) {
-            Firebase.crashlytics.log("initializeRemoteConfig-error: $e")
+            Firebase.crashlytics.recordException(e)
         }
         setContent {
             Connect4GameTheme {

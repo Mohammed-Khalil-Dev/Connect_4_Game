@@ -28,15 +28,12 @@ class BotDifficultyManager(private val context: Context) {
             val activeDepth = if (remoteValue > 0) remoteValue.toInt() else botDifficulty.depth
 
             // Log an analytics event to track which depth was chosen and whether it was overridden by Remote Config
-            try {
-                Firebase.analytics.logEvent("bot_difficulty_evaluated", Bundle().apply {
-                    putString("difficulty_level", botDifficulty.name)
-                    putLong("resolved_depth", activeDepth.toLong())
-                    putBoolean("is_remote_override", remoteValue > 0)
-                })
-            }
-            catch (_: Exception) {
-            }
+            Firebase.analytics.logEvent("bot_difficulty_evaluated", Bundle().apply {
+                putString("difficulty_level", botDifficulty.name)
+                putLong("resolved_depth", activeDepth.toLong())
+                putBoolean("is_remote_override", remoteValue > 0)
+            })
+
 
             return activeDepth
         }
