@@ -18,8 +18,11 @@ import com.google.firebase.crashlytics.crashlytics
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
@@ -34,6 +37,9 @@ import java.net.Socket
 class WiFiDirectManager(private val context: Context) {
 
     private var currentSocket: Socket? = null
+
+    private val _incomingMovesFlow = MutableSharedFlow<Int>()
+    val incomingMovesFlow: SharedFlow<Int> = _incomingMovesFlow.asSharedFlow()
 
     private fun Socket.inputStreamReader() = BufferedReader(InputStreamReader(inputStream))
     //auto flush: send data
@@ -170,7 +176,7 @@ class WiFiDirectManager(private val context: Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun connectToDevice(device: WifiP2pDevice) {
+    private fun connectToDevice(device: WifiP2pDevice) {
         if (!PermissionHelper.isRequiredWifiP2pPermissionGranted(context)) return
 
         val connectionConfig = WifiP2pConfig().apply {
@@ -199,7 +205,7 @@ class WiFiDirectManager(private val context: Context) {
         manager.requestConnectionInfo(channel, connectionListener)
     }
     private fun startGameDataStream(socket: Socket) {
-        if (!handShake(socket = socket)) {
+        if (!testConnection(socket = socket)) {
             socket.close()
             return
         }
@@ -217,7 +223,7 @@ class WiFiDirectManager(private val context: Context) {
                 if (incomingMessage != null) {
                     val dataMap = Gson().fromJson(incomingMessage, Map::class.java)
                     val playedCol = (dataMap["move"] as Double).toInt()
-                    //todo: update game board with the opponent move
+                    _incomingMovesFlow.emit(playedCol)
 
 
                 }
@@ -236,13 +242,13 @@ class WiFiDirectManager(private val context: Context) {
         }
     }
 
-    fun onBoardColumnClicked(column: Int) {
+    fun onDropPiece(column: Int) {
         currentSocket?.let { socket ->
             sendMyMove(socket, column = column)
         }
     }
 
-    private fun handShake(socket: Socket): Boolean {
+    private fun testConnection(socket: Socket): Boolean {
 
         val writer = socket.outputStreamWriter()
         val reader = socket.inputStreamReader()
@@ -251,10 +257,10 @@ class WiFiDirectManager(private val context: Context) {
 
         val response = reader.readLine()
         val isSuccessful = response == "READY"
-        Firebase.analytics.logEvent("is_successful_handshake", Bundle().apply {
+        Firebase.analytics.logEvent("is_successful_connection", Bundle().apply {
             val localIp = (socket.localSocketAddress as? InetSocketAddress)?.address?.hostAddress ?: "Unknown"
             val remoteIp = (socket.remoteSocketAddress as? InetSocketAddress)?.address?.hostAddress ?: "Unknown"
-            putBoolean("is_successful_handshake", isSuccessful)
+            putBoolean("is_successful_connection", isSuccessful)
             putString("source IP", localIp)
             putString("destination IP", remoteIp)
             putInt("port", socket.port)

@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">" كونكت  4"</string>
     <string name="single_player_vs_bot">لعب فردي (ضد الجهاز)</string>
-    <string name="two_player_local">لعب ثنائي (على نفس الجهاز)</string>
+    <string name="two_player_same_deivce">لعب ثنائي (على نفس الجهاز)</string>
     <string name="play_turn">العب الدور</string>
     <string name="red_player_turn">دور اللاعب الأحمر</string>
     <string name="orange_player_turn">دور اللاعب البرتقالي</string>
@@ -49,5 +49,6 @@
     <string name="orange">برتقالي</string>
     <string name="change_bot_piece_color">تغيير لون قطعة الحاسوب؟</string>
     <string name="change_bot_piece_color_text">سيؤدي تغيير لون قطعة الحاسوب إلى إعادة تعيين اللعب الفردي الحالية</string>
+    <string name="two_player_same_network">لعب ثنائي (على نفس الشبكة)</string>
 
 </resources>

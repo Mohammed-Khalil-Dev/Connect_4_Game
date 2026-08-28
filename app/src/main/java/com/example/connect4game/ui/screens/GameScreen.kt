@@ -48,7 +48,8 @@ fun GameScreen(
             GameType.SINGLE_PLAYER -> SinglePlayerGameScreen(
                 viewModel = viewModel
             )
-            GameType.TWO_PLAYER -> TwoPlayerGameScreen(viewModel = viewModel)
+            GameType.TWO_PLAYER_SAME_DEVICE -> TwoPlayerSameDeviceGameScreen(viewModel = viewModel)
+            GameType.TWO_PLAYER_DIFFERENT_DEVICE -> TwoPlayerDifferentDeviceGameScreen(viewModel = viewModel)
         }
     }
 }
@@ -127,7 +128,7 @@ fun SinglePlayerGameScreen(
     ResetGameButton(canReset = !isBotThinking) { viewModel.resetGame(startingPlayer = playerPiece) }
 }
 @Composable
-fun TwoPlayerGameScreen(viewModel: GameScreenViewModel) {
+fun TwoPlayerSameDeviceGameScreen(viewModel: GameScreenViewModel) {
 
     val uiState by viewModel.uiState.collectAsState()
 
@@ -166,6 +167,10 @@ fun TwoPlayerGameScreen(viewModel: GameScreenViewModel) {
     ResetGameButton { viewModel.resetGame(startingPlayer = listOf(Piece.RED, Piece.ORANGE).random()) }
 }
 
+@Composable
+fun TwoPlayerDifferentDeviceGameScreen(viewModel: GameScreenViewModel) {
+
+}
 @Composable
 fun ScoreBoard(redWins: Int, orangeWins: Int, playerOneLabelId: Int, playerTwoLabelId: Int) {
     Column {

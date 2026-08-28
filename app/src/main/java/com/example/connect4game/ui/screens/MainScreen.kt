@@ -33,7 +33,9 @@ fun MainScreen(
     onGameTypeSelected: (GameType) -> Unit
 ) {
     Column(
-        modifier = Modifier.padding(paddingValues).fillMaxSize(),
+        modifier = Modifier
+            .padding(paddingValues)
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -76,13 +78,21 @@ fun GameTypesArea(onGameTypeSelected: (GameType) -> Unit) {
     Spacer(modifier = Modifier.height(8.dp))
 
     Button(
-        onClick = { onGameTypeSelected(GameType.TWO_PLAYER) },
+        onClick = { onGameTypeSelected(GameType.TWO_PLAYER_SAME_DEVICE) },
         modifier = Modifier
             .width(200.dp)
             .background(brush = boardBlueGradient, shape = buttonShape),
         colors = buttonColors(containerColor = Color.Transparent)
     ) {
-        Text(stringResource(R.string.two_player_local))
+        Text(text = stringResource(R.string.two_player_same_deivce))
+    }
+
+    Button(onClick = {onGameTypeSelected(GameType.TWO_PLAYER_DIFFERENT_DEVICE)},
+        modifier = Modifier
+            .width(200.dp)
+            .background(brush = boardBlueGradient, shape = buttonShape),
+        colors = buttonColors(containerColor = Color.Transparent)) {
+        Text(text = stringResource(R.string.two_player_same_network))
     }
 }
 
@@ -90,5 +100,5 @@ fun GameTypesArea(onGameTypeSelected: (GameType) -> Unit) {
 @Composable
 fun PreviewMainScreen() {
 
-    MainScreen(onGameTypeSelected = { })
+    MainScreen(onGameTypeSelected = {})
 }

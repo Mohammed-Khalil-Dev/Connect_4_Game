@@ -9,9 +9,10 @@ import com.example.connect4game.data.BotPieceColorManager
 import com.example.connect4game.data.ScoreManager
 import com.example.connect4game.model.game.types.GameType
 import com.example.connect4game.model.settings.audio.SoundManager
+import com.example.connect4game.network.WiFiDirectManager
 import com.example.connect4game.ui.viewmodels.GameScreenViewModel
 
-class GameViewModelFactory(private val context: Context, private val gameType: GameType): ViewModelProvider.Factory {
+class GameViewModelFactory(private val context: Context, private val gameType: GameType, private val wifiDirectManager: WiFiDirectManager? = null): ViewModelProvider.Factory {
     //override create so it create viewmodel with parameters
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(GameScreenViewModel::class.java)) {
@@ -22,9 +23,15 @@ class GameViewModelFactory(private val context: Context, private val gameType: G
             val soundManager = SoundManager(context = appContext)
             val difficultyManager = BotDifficultyManager(context = appContext)
             val botPieceColorManager = BotPieceColorManager(context = appContext)
-            return GameScreenViewModel(scoreManager = scoreManager, soundManager = soundManager,
-                botDifficultyManager = difficultyManager, botPieceColorManager = botPieceColorManager,
-                gameType = gameType) as T
+
+            return GameScreenViewModel(
+                gameType = gameType,
+                scoreManager = scoreManager,
+                soundManager = soundManager,
+                botDifficultyManager = difficultyManager,
+                botPieceColorManager = botPieceColorManager,
+                wifiDirectManager = wifiDirectManager
+            ) as T
         }
         else {
             throw IllegalArgumentException("Unknown ViewModel class")

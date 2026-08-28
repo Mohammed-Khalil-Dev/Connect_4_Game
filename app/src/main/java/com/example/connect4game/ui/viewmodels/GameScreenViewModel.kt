@@ -15,6 +15,7 @@ import com.example.connect4game.model.game.types.GameType
 import com.example.connect4game.model.game.types.Piece
 import com.example.connect4game.model.settings.audio.Sound
 import com.example.connect4game.model.settings.audio.SoundManager
+import com.example.connect4game.network.WiFiDirectManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +31,8 @@ class GameScreenViewModel(
     private val scoreManager: ScoreManager,
     private val soundManager: SoundManager,
     private val botDifficultyManager: BotDifficultyManager,
-    private val botPieceColorManager: BotPieceColorManager
+    private val botPieceColorManager: BotPieceColorManager,
+    private val wifiDirectManager: WiFiDirectManager? = null
 ) : ViewModel() {
 
     private val gameMatrix = GameMatrix()
@@ -67,6 +69,15 @@ class GameScreenViewModel(
             scoreManager.getWinsFlow(gameType = gameType, piece = Piece.ORANGE).collect { orangeWins ->
                 _uiState.update { currentState ->
                     currentState.copy(orangeWins = orangeWins)
+                }
+            }
+        }
+
+        if (gameType == GameType.TWO_PLAYER_DIFFERENT_DEVICE && wifiDirectManager != null) {
+
+            viewModelScope.launch {
+                wifiDirectManager.incomingMovesFlow.collect { networkColumn ->
+                    onPieceDrop(col = networkColumn, isFromNetwork = true)
                 }
             }
         }
@@ -137,8 +148,11 @@ class GameScreenViewModel(
     }
 
 
-    fun onPieceDrop(col: Int) {
+    fun onPieceDrop(col: Int, isFromNetwork: Boolean = false) {
         val currentPiece = uiState.value.currentPlayer
+        if (gameType == GameType.TWO_PLAYER_DIFFERENT_DEVICE && !isFromNetwork) {
+            wifiDirectManager?.onDropPiece(col)
+        }
         val landedRow = gameMatrix.dropPiece(col = col, piece = currentPiece)
 
         val newGameStateDetails = if (landedRow != null) {

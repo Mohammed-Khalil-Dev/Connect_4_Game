@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.connect4game.model.game.types.GameType
+import com.example.connect4game.network.WiFiDirectManager
 import com.example.connect4game.ui.components.CustomTopBar
 import com.example.connect4game.ui.factory.GameViewModelFactory
 import com.example.connect4game.ui.screens.GameScreen
@@ -46,13 +47,23 @@ fun Connect4Game() {
     // get the current route(screen)
     val currentScreen = navBackStackEntry?.destination?.route
     val context = LocalContext.current
-    val singlePlayerFactory = remember { GameViewModelFactory(context = context, gameType = GameType.SINGLE_PLAYER) }
-    val twoPlayerFactory = remember { GameViewModelFactory(context = context, gameType = GameType.TWO_PLAYER) }
+    val appContext = context.applicationContext
+    val wifiDirectManager = remember { WiFiDirectManager(appContext) }
+    val singlePlayerFactory = remember { GameViewModelFactory(context = appContext, gameType = GameType.SINGLE_PLAYER) }
+    val twoPlayerFactory = remember { GameViewModelFactory(context = appContext, gameType = GameType.TWO_PLAYER_SAME_DEVICE) }
 
     val singlePlayerViewModel: GameScreenViewModel = viewModel(key = GameType.SINGLE_PLAYER.name,
         factory = singlePlayerFactory)
-    val twoPlayerViewModel: GameScreenViewModel = viewModel(key = GameType.TWO_PLAYER.name,
+    val twoPlayerViewModel: GameScreenViewModel = viewModel(key = GameType.TWO_PLAYER_SAME_DEVICE.name,
         factory = twoPlayerFactory)
+
+    val networkPlayerFactory = remember { GameViewModelFactory(context = appContext, gameType = GameType.TWO_PLAYER_DIFFERENT_DEVICE, wifiDirectManager =
+        wifiDirectManager) }
+
+    val networkPlayerViewModel: GameScreenViewModel = viewModel(
+        key = GameType.TWO_PLAYER_DIFFERENT_DEVICE.name,
+        factory = networkPlayerFactory
+    )
 
     Scaffold(
         modifier = Modifier.fillMaxSize()
@@ -81,11 +92,10 @@ fun Connect4Game() {
             composable(route = Screen.MainMenu.name) {
                 MainScreen(
                     onGameTypeSelected = { selectedType ->
-                        if (selectedType == GameType.SINGLE_PLAYER) {
-                            navController.navigate(Screen.SinglePlayer.name)
-                        }
-                        else {
-                            navController.navigate(Screen.TwoPlayer.name)
+                        when(selectedType) {
+                            GameType.SINGLE_PLAYER ->  navController.navigate(Screen.SinglePlayer.name)
+                            GameType.TWO_PLAYER_SAME_DEVICE ->  navController.navigate(Screen.TwoPlayerSameDevice.name)
+                            GameType.TWO_PLAYER_DIFFERENT_DEVICE -> navController.navigate(Screen.TwoPLayerDifferentDevice.name)
                         }
                     }
                 )
@@ -100,11 +110,19 @@ fun Connect4Game() {
             }
 
 
-            composable(route = Screen.TwoPlayer.name) {
+            composable(route = Screen.TwoPlayerSameDevice.name) {
                 GameScreen(
-                    gameType = GameType.TWO_PLAYER,
+                    gameType = GameType.TWO_PLAYER_SAME_DEVICE,
                     paddingValues = innerPadding,
                     viewModel = twoPlayerViewModel
+                )
+            }
+
+            composable(route = Screen.TwoPLayerDifferentDevice.name) {
+                GameScreen(
+                    gameType = GameType.TWO_PLAYER_DIFFERENT_DEVICE,
+                    paddingValues = innerPadding,
+                    viewModel = networkPlayerViewModel
                 )
             }
 

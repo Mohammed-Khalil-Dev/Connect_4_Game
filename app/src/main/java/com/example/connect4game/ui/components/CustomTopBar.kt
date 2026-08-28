@@ -73,7 +73,7 @@ fun CustomTopBar(
         title = {
             when (currentScreen) {
                 Screen.SinglePlayer.name -> Text(stringResource(R.string.single_player_game), color = Color.White)
-                Screen.TwoPlayer.name -> Text(stringResource(R.string.two_player_game), color = Color.White)
+                Screen.TwoPlayerSameDevice.name -> Text(stringResource(R.string.two_player_game), color = Color.White)
                 Screen.Setting.name -> Text(stringResource(R.string.settings), color = Color.White)
             }
 
@@ -121,5 +121,5 @@ fun CustomTopBar(
 @Composable
 @Preview(showBackground = true)
 fun PreviewCustomTopBar() {
-    CustomTopBar(Screen.TwoPlayer.name,{}) { }
+    CustomTopBar(Screen.TwoPlayerSameDevice.name,{}) { }
 }

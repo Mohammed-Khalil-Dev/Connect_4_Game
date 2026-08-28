@@ -79,7 +79,7 @@ fun SettingScreen(
     
     // observe volumeFlow. trigger on flow value change
     val currentVolume by soundManager.volumeFlow.collectAsState(initial = SoundManager.DEFAULT_SOUND_VOLUME)
-    // rememberSaveable survives configuration changes (like screen rotation),
+    // rememberSavable survives configuration changes (like screen rotation),
     // unlike regular remember. Used here to prevent alert popups from dismissing if the phone tilts.
     var gameTypeToReset by rememberSaveable { mutableStateOf<GameType?>(null) }
     val selectedDifficulty: BotDifficulty by botDifficultyManager.botDifficultyFlow.collectAsState(initial = BotDifficulty.MEDIUM)
@@ -164,7 +164,7 @@ fun SettingScreen(
             }
             Spacer(modifier = Modifier.height(10.dp))
             ResetWinsButton(text = stringResource(R.string.reset_two_player_wins)) {
-                gameTypeToReset = GameType.TWO_PLAYER
+                gameTypeToReset = GameType.TWO_PLAYER_SAME_DEVICE
             }
 
         }
@@ -354,7 +354,8 @@ fun ResetAlertDialog(
 ) {
     val gameTypeToReset = when(gameType) {
         GameType.SINGLE_PLAYER -> stringResource(R.string.single_player)
-        GameType.TWO_PLAYER -> stringResource(R.string.two_player)
+        GameType.TWO_PLAYER_SAME_DEVICE-> stringResource(R.string.two_player)
+        GameType.TWO_PLAYER_DIFFERENT_DEVICE -> {}
     }
 
     AlertDialog(
